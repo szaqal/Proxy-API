@@ -61,4 +61,4 @@ jobs:
         push: true
         tags: |
           szaqal/proxy-api:latest
-          szaqal/proxy-api:${{ github.sha }}
+          szaqal/proxy-api:${{ github.run_number }}
