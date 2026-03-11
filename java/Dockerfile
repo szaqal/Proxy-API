@@ -10,14 +10,23 @@ RUN apk add --no-cache curl
 
 COPY proxy-api/src ./src
 
-RUN ./mvnw package -DskipTests
+RUN ./mvnw package 
 
 FROM eclipse-temurin:21-jre-alpine
+
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 WORKDIR /app
 
 COPY --from=builder /build/target/proxy-api-0.0.1-SNAPSHOT.jar app.jar
 
+RUN chown appuser:appgroup app.jar
+
+USER appuser
+
 EXPOSE 8080
+
+HEALTHCHECK --interval=15s --timeout=5s --retries=3 --start-period=15s \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

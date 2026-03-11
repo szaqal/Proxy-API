@@ -13,6 +13,9 @@ init-mvn:
 		--dependencies=actuator,web \
 		--extract $(artifact_id)
 
+checkov-java:
+	docker run --rm -v $(shell pwd):/work bridgecrew/checkov -f /work/java/Dockerfile --framework dockerfile
+
 build-java:
 	docker build -t proxy-api:$(shell git rev-parse --short HEAD) -f java/Dockerfile java
 
