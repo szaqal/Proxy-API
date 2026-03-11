@@ -1,3 +1,6 @@
+artifact_id=proxy-api
+group_id=com.proxy.demo
+
 
 init-mvn:
 	cd java && spring init \
@@ -5,8 +8,8 @@ init-mvn:
 		--build=maven \
 		--packaging=jar \
 		--type=maven-project \
-		--artifact-id=proxy-api 
-		--group-id=com.proxy.demo \
+		--artifact-id=$(artifact_id) \
+		--group-id=$(group_id) \
 		--dependencies=actuator,web \
-		--extract ptc-demo
+		--extract $(artifact_id)
 
