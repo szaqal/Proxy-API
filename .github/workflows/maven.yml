@@ -33,11 +33,11 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
     - name: Cache OWASP NVD database
-      uses: actions/cache@v4
-      with:
-        path: ~/.m2/repository/org/owasp/dependency-check-data
-        key: owasp-nvd-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
-        restore-keys: owasp-nvd-${{ runner.os }}-
+#      uses: actions/cache@v4
+#      with:
+#        path: ~/.m2/repository/org/owasp/dependency-check-data
+#        key: owasp-nvd-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
+#        restore-keys: owasp-nvd-${{ runner.os }}-
     - name: Run OWASP Dependency Check
       env:
         NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
