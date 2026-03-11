@@ -17,7 +17,7 @@ checkov-java:
 	docker run --rm -v $(shell pwd):/work bridgecrew/checkov -f /work/java/Dockerfile --framework dockerfile
 
 build-java:
-	docker build -t proxy-api:$(shell git rev-parse --short HEAD) -f java/Dockerfile java
+	docker build -t proxy-api:$(shell git rev-parse --short HEAD) -f java/Dockerfile.local java
 
 start-java:
 	TAG=$(shell git rev-parse --short HEAD) docker-compose -f java/docker-compose.yml up -d
