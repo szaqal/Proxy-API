@@ -16,9 +16,9 @@ init-mvn:
 build-java:
 	docker build -t proxy-api:$(shell git rev-parse --short HEAD) -f java/Dockerfile java
 
-start:
+start-java:
 	TAG=$(shell git rev-parse --short HEAD) docker-compose up -d
 
-stop:
+stop-java:
 	docker-compose down
 
