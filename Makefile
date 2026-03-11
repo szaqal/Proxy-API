@@ -13,3 +13,6 @@ init-mvn:
 		--dependencies=actuator,web \
 		--extract $(artifact_id)
 
+build-java:
+	docker build -t proxy-api:latest -f java/Dockerfile java
+
