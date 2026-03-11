@@ -14,5 +14,11 @@ init-mvn:
 		--extract $(artifact_id)
 
 build-java:
-	docker build -t proxy-api:latest -f java/Dockerfile java
+	docker build -t proxy-api:$(shell git rev-parse --short HEAD) -f java/Dockerfile java
+
+start:
+	TAG=$(shell git rev-parse --short HEAD) docker-compose up -d
+
+stop:
+	docker-compose down
 

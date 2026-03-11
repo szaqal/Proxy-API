@@ -1,0 +1,7 @@
+version: '3.8'
+
+services:
+  proxy-api:
+    image: proxy-api:${TAG:-latest}
+    ports:
+      - "8080:8080"
