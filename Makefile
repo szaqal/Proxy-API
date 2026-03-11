@@ -17,8 +17,8 @@ build-java:
 	docker build -t proxy-api:$(shell git rev-parse --short HEAD) -f java/Dockerfile java
 
 start-java:
-	TAG=$(shell git rev-parse --short HEAD) docker-compose up -d
+	TAG=$(shell git rev-parse --short HEAD) docker-compose -f java/docker-compose.yml up -d
 
 stop-java:
-	docker-compose down
+	docker-compose -f java/docker-compose.yml down
 
