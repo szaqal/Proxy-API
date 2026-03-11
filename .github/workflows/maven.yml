@@ -32,7 +32,7 @@ jobs:
       with:
         java-version: '21'
         distribution: 'temurin'
-    - name: Cache OWASP NVD database
+#    - name: Cache OWASP NVD database
 #      uses: actions/cache@v4
 #      with:
 #        path: ~/.m2/repository/org/owasp/dependency-check-data
