@@ -66,6 +66,9 @@
 						<format>JSON</format>
 					</formats>
 					<nvdApiKey>${env.NVD_API_KEY}</nvdApiKey>
+					  <nvdApiDelay>4000</nvdApiDelay>       <!-- ms between requests -->
+					  <nvdApiResultsPerPage>2000</nvdApiResultsPerPage>
+					  <nvdApiMaxRetryCount>10</nvdApiMaxRetryCount>
 				</configuration>
 			</plugin>
 		</plugins>
