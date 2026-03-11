@@ -13,15 +13,15 @@ init-mvn:
 		--dependencies=actuator,web \
 		--extract $(artifact_id)
 
-checkov-java:
+local-checkov-java:
 	docker run --rm -v $(shell pwd):/work bridgecrew/checkov -f /work/java/Dockerfile --framework dockerfile
 
-build-java:
+local-build-java:
 	docker build -t proxy-api:$(shell git rev-parse --short HEAD) -f java/Dockerfile.local java
 
-start-java:
+local-start-java:
 	TAG=$(shell git rev-parse --short HEAD) docker-compose -f java/docker-compose.yml up -d
 
-stop-java:
+local-stop-java:
 	docker-compose -f java/docker-compose.yml down
 
