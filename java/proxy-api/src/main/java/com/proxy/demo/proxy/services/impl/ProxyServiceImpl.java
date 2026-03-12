@@ -3,6 +3,7 @@ package com.proxy.demo.proxy.services.impl;
 import com.proxy.demo.proxy.services.api.LookupResult;
 import com.proxy.demo.proxy.services.api.ProxyService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriBuilder;
@@ -22,8 +23,8 @@ public class ProxyServiceImpl implements ProxyService {
   }
 
   @Override
+  @Cacheable(value = "weatherCache", key = "#longitude + ':' + #latitude")
   public LookupResult loadWeatherData(double longitude, double latitude, Map<String, String> sourceParams) {
-    //TODO: checks for HTTP error codes for example
     LookupResult response = weatherRestClientBuilder.build().get()
         .uri(ofParams(sourceParams))
         .retrieve()

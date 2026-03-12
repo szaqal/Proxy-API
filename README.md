@@ -27,6 +27,10 @@ What could be considered (ADRs):
 
 * NOT adding (NOW) Cache hierarchy Local -> Redis to increas a bit resilience if Redis get unavailable. (Skip for now)
 
+* NOT adding (NOW) [Spring config](https://docs.spring.io/spring-cloud-config/docs/current/reference/html/) server and automatic bean reload. 
+
+* Externalize client config socker/read timeout to env variable (configMap)
+
 
 
 TODO:
