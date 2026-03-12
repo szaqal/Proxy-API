@@ -41,6 +41,7 @@ bench:
 	ab -n 100 -c 100 "http://localhost:8080/forecast?latitude=52.52&longitude=13.41&current=temperature_2m,wind_speed_10m"
 
 
+
 minikube-start:
 	minikube start --cpus 4 --memory 8000 --nodes=1
 
@@ -60,8 +61,11 @@ k8s-helm-install:
 	helm install proxy-api helm/proxy-api --set image.tag=$(published_image_tag) --namespace proxy
 
 k8s-helm-upgrade:
-	helm upgrade proxy-api helm/proxy-api --set image.tag=$(published_image_tag)
+	helm upgrade proxy-api helm/proxy-api --set image.tag=$(published_image_tag) --namespace proxy
 
 k8s-helm-uninstall:
 	helm uninstall proxy-api -n proxy
 	kubectl delete namespace proxy 
+
+k8s-check:
+	curl -H "Host: proxy-api.local" "http://$$(minikube ip)/forecast?latitude=52.52&longitude=13.41&current=temperature_2m,wind_speed_10m"
