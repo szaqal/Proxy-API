@@ -49,13 +49,18 @@ minikube-delete:
 
 
 pods:
-	minikube kubectl -- get pods -A
+	minikube kubectl -- get pods -n proxy
 
-helm-install:
-	helm install proxy-api helm/proxy-api --set image.tag=$(published_image_tag)
+k8s-proxy-logs:
+	kubectl logs -f deployments/proxy-api -n proxy -f
 
-helm-upgrade:
-	helm upgrade proxy-api helm/proxy-api
+k8s-helm-install:
+	kubectl create namespace proxy 
+	helm install proxy-api helm/proxy-api --set image.tag=$(published_image_tag) --namespace proxy
 
-helm-uninstall:
-	helm uninstall proxy-api
+k8s-helm-upgrade:
+	helm upgrade proxy-api helm/proxy-api --set image.tag=$(published_image_tag)
+
+k8s-helm-uninstall:
+	helm uninstall proxy-api -n proxy
+	kubectl delete namespace proxy 
