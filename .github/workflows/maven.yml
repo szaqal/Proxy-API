@@ -25,6 +25,8 @@ jobs:
   owasp:
     runs-on: ubuntu-latest
     needs: checkov
+    env:
+      OWASP_DATA_DIR: ${{ github.workspace }}/.owasp/dependency-check-data
     steps:
     - uses: actions/checkout@v3
     - name: Set up JDK
@@ -35,7 +37,7 @@ jobs:
     - name: Cache OWASP NVD database
       uses: actions/cache@v4
       with:
-        path: ~/.m2/repository/org/owasp/dependency-check-data
+        path: ${{ env.OWASP_DATA_DIR }}
         key: owasp-nvd-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
         restore-keys: owasp-nvd-${{ runner.os }}-
     - name: Run OWASP Dependency Check

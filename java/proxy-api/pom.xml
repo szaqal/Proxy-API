@@ -109,6 +109,7 @@
 						<format>JSON</format>
 					</formats>
 					<nvdApiKey>${env.NVD_API_KEY}</nvdApiKey>
+					<dataDirectory>${env.OWASP_DATA_DIR}</dataDirectory>
 				</configuration>
 			</plugin>
 			<plugin>
