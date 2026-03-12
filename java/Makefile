@@ -27,7 +27,7 @@ artifact_id=proxy-api
 group_id=com.proxy.demo
 current_version=0.0.1
 tag=$(current_version)-$(shell git rev-parse --short HEAD) 
-published_image_tag=0.0.1-fbf344f
+published_image_tag=0.0.1-d922374
 
 
 init-mvn:
