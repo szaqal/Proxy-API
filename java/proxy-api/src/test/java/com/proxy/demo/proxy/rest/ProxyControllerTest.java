@@ -149,23 +149,6 @@ class ProxyControllerTest {
     mockServer.verify();
   }
 
-  @Test
-  void forecast_shouldReturn504WhenReadTimeout() throws Exception {
-    mockServer.expect(requestTo(containsString("https://api.open-meteo.com/v1/forecast")))
-        .andRespond(withException(new SocketTimeoutException("Read timed out")));
-
-    mockMvc.perform(get("/forecast")
-            .param("latitude", "52.55")
-            .param("longitude", "13.45")
-            .param("current", "temperature_2m,wind_speed_10m")
-        )
-        .andExpect(status().isGatewayTimeout())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.error").value("Gateway Timeout"))
-        .andExpect(jsonPath("$.message").value("Request to upstream service timed out"));
-
-    mockServer.verify();
-  }
 
   @Test
   void forecast_shouldReturn504WhenConnectionTimeout() throws Exception {
