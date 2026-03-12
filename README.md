@@ -41,7 +41,6 @@ What could be considered (ADRs):
 TODO:
 ---
 * OpenTelemetry
-* Retrues
 
 Tutorial
 ---
@@ -140,5 +139,6 @@ Delete the Minikube cluster:
 ```bash
 make minikube-delete
 ```
+
 
 
