@@ -1,6 +1,7 @@
 package com.proxy.demo.proxy.rest;
 
 import com.proxy.demo.proxy.exception.ProxyExceptions;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.time.Instant;
 import java.util.Map;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -19,6 +21,7 @@ public class GlobalExceptionHandler {
         "message", ex.getMessage(),
         "timestamp", Instant.now().toString()
     );
+    log.debug(ex.getMessage());
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
   }
 
@@ -29,6 +32,7 @@ public class GlobalExceptionHandler {
         "message", "Resource not found",
         "timestamp", Instant.now().toString()
     );
+    log.debug(ex.getMessage());
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
   }
 }
