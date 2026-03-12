@@ -6,7 +6,6 @@
 
 TODO:
 ---
-* Relative memory on startup
 * OpenAPI
 * OpenTelemetry
 
