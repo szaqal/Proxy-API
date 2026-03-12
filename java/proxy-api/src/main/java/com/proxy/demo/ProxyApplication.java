@@ -23,15 +23,15 @@ public class ProxyApplication {
    * </ol>
    */
   @Bean
-    RestClient weatherRestClient() {
-      var requestFactory = new SimpleClientHttpRequestFactory();
-      requestFactory.setConnectTimeout(ofSeconds(1));
-      requestFactory.setReadTimeout(ofSeconds(1));
+  RestClient weatherRestClient() {
+    var requestFactory = new SimpleClientHttpRequestFactory();
+    requestFactory.setConnectTimeout(ofSeconds(1));
+    requestFactory.setReadTimeout(ofSeconds(1));
 
-      // If performance over debugging is valued mode we could use Reactive WebClient too.
-      return RestClient.builder()
-        .requestFactory(requestFactory)
-        .baseUrl("https://api.open-meteo.com/")
-        .build();
-    }
+    // If performance over debugging is valued mode we could use Reactive WebClient too.
+    return RestClient.builder()
+      .requestFactory(requestFactory)
+      .baseUrl("https://api.open-meteo.com/")
+      .build();
+  }
 }
