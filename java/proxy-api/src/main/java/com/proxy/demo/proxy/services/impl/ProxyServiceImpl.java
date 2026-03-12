@@ -1,36 +1,39 @@
 package com.proxy.demo.proxy.services.impl;
 
 import com.proxy.demo.proxy.services.api.ProxyService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriBuilder;
 
+import java.net.URI;
 import java.util.Map;
+import java.util.function.Function;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class ProxyServiceImpl implements ProxyService {
 
-  private final RestClient restClient;
+  private final RestClient weatherRestClient;
 
-  public ProxyServiceImpl() {
-    this.restClient = RestClient.builder()
-        .baseUrl("https://api.open-meteo.com/")
-        .build();
-  }
 
   @Override
   public void loadWeatherData(Map<String, String> params) {
-    String response = restClient.get()
-        .uri(uriBuilder -> {
-          uriBuilder.path("/v1/forecast");
-          params.forEach(uriBuilder::queryParam);
-          return uriBuilder.build();
-        })
+    String response = weatherRestClient.get()
+        .uri(ofParams(params))
         .retrieve()
         .body(String.class);
 
     log.info("Loaded {} {}", params, response);
+  }
+
+  private static Function<UriBuilder, URI> ofParams( Map<String, String> params ) {
+    return uriBuilder -> {
+      uriBuilder.path("/v1/forecast");
+      params.forEach(uriBuilder::queryParam);
+      return uriBuilder.build();
+    };
   }
 }
