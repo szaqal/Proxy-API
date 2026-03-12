@@ -39,3 +39,13 @@ run-java:
 bench:
 	ab -n 100 -c 100 "http://localhost:8080/forecast?latitude=52.52&longitude=13.41&current=temperature_2m,wind_speed_10m"
 
+
+minikube-start:
+	minikube start --cpus 4 --memory 8000 --nodes=1
+
+minikube-delete:
+	minikube delete
+
+
+pods:
+	minikube kubectl -- get pods -A
