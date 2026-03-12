@@ -110,7 +110,7 @@
 					</formats>
 					<nvdApiKey>${env.NVD_API_KEY}</nvdApiKey>
 					  <nvdApiDelay>4000</nvdApiDelay>       <!-- ms between requests -->
-					  <nvdApiResultsPerPage>2000</nvdApiResultsPerPage>
+					  <nvdApiResultsPerPage>20000</nvdApiResultsPerPage>
 					  <nvdApiMaxRetryCount>10</nvdApiMaxRetryCount>
 					  <connectionTimeout>30000</connectionTimeout>
 					  <readTimeout>30000</readTimeout>
