@@ -56,7 +56,7 @@ k8s-proxy-logs:
 
 k8s-helm-install:
 	kubectl create namespace proxy 
-	helm install redis oci://registry-1.docker.io/bitnamicharts/redis --namespace proxy --set architecture=standalone
+	helm install redis oci://registry-1.docker.io/bitnamicharts/redis --namespace proxy --set architecture=standalone,auth.enabled=false
 	helm install proxy-api helm/proxy-api --set image.tag=$(published_image_tag) --namespace proxy
 
 k8s-helm-upgrade:
