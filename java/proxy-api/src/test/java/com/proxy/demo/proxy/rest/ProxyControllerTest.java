@@ -1,6 +1,5 @@
 package com.proxy.demo.proxy.rest;
 
-import com.proxy.demo.proxy.services.api.ProxyService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +11,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -26,7 +26,7 @@ class ProxyControllerTest {
   private WebApplicationContext webApplicationContext;
 
   @Autowired
-  private ProxyService proxyService;
+  private RestClient.Builder weatherRestClientBuilder;
 
   private MockMvc mockMvc;
   private MockRestServiceServer mockServer;
@@ -34,9 +34,7 @@ class ProxyControllerTest {
   @BeforeEach
   void setUp() {
     mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-    mockServer = MockRestServiceServer.bindTo(RestClient.builder()
-        .baseUrl("https://api.open-meteo.com/"))
-        .build();
+    mockServer = MockRestServiceServer.bindTo(weatherRestClientBuilder).build();
   }
 
   @Test
@@ -51,7 +49,7 @@ class ProxyControllerTest {
         }
         """;
 
-    mockServer.expect(requestTo("https://api.open-meteo.com/v1/forecast"))
+    mockServer.expect(requestTo(containsString("https://api.open-meteo.com/v1/forecast")))
         .andRespond(withSuccess(jsonResponse, MediaType.APPLICATION_JSON));
 
     // When & Then
@@ -94,7 +92,7 @@ class ProxyControllerTest {
   @Test
   void forecast_shouldReturn404WhenNoDataFound() throws Exception {
     // Given
-    mockServer.expect(requestTo("https://api.open-meteo.com/"))
+    mockServer.expect(requestTo(containsString("https://api.open-meteo.com/v1/forecast")))
         .andRespond(withSuccess("{}", MediaType.APPLICATION_JSON));
 
     // When & Then

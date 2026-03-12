@@ -2,7 +2,6 @@ package com.proxy.demo.proxy.services.impl;
 
 import com.proxy.demo.proxy.services.api.LookupResult;
 import com.proxy.demo.proxy.services.api.ProxyService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -14,15 +13,18 @@ import java.util.function.Function;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class ProxyServiceImpl implements ProxyService {
 
-  private final RestClient weatherRestClient;
+  private final RestClient.Builder weatherRestClientBuilder;
+
+  public ProxyServiceImpl(RestClient.Builder weatherRestClientBuilder) {
+    this.weatherRestClientBuilder = weatherRestClientBuilder;
+  }
 
   @Override
   public LookupResult loadWeatherData(Map<String, String> params) {
     //TODO: checks for HTTP error codes for example
-    LookupResult response = weatherRestClient.get()
+    LookupResult response = weatherRestClientBuilder.build().get()
         .uri(ofParams(params))
         .retrieve()
         .body(LookupResult.class);
