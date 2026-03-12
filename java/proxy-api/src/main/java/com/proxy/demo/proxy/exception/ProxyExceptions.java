@@ -1,44 +1,51 @@
 package com.proxy.demo.proxy.exception;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+
 public class ProxyExceptions {
 
   public static NotFoundException notFound() {
     return new NotFoundException();
   }
 
-
   //TODO: differentiate message
   public static InvalidRequestException missingLongitude() {
     return new InvalidRequestException("Missing either longitude or latitude");
   }
 
-
   public static InvalidRequestException missingLatitude() {
     return new InvalidRequestException("Missing either longitude or latitude");
   }
 
-  public static UpstreamException upstreamException() {
-    return new UpstreamException();
+  public static UpstreamServerErrorException upstreamServerErrorException() {
+    return new UpstreamServerErrorException();
   }
 
-
-  public static InvalidRequestException invalidRequestException(String message) {
+  public static InvalidRequestException invalidRequestException( String message ) {
     return new InvalidRequestException(message);
   }
 
+  public static RuntimeException ofUpstreamStatusCode( HttpStatusCode statusCode ) {
+    if (statusCode.is4xxClientError()) {
+      throw invalidRequestException("Upstream rejected the request: %s".formatted(statusCode));
+    } else if (statusCode.is5xxServerError()) {
+      throw upstreamServerErrorException();
+    }
+    return new RuntimeException("Unrecognized upstream exception");
+  }
 
-
-
-  public static class NotFoundException extends RuntimeException { }
+  public static class NotFoundException extends RuntimeException {
+  }
 
   public static class InvalidRequestException extends RuntimeException {
-    public InvalidRequestException(String message) {
+    public InvalidRequestException( String message ) {
       super(message);
     }
   }
 
-  public static class UpstreamException extends RuntimeException {
-    public UpstreamException() {
+  public static class UpstreamServerErrorException extends RuntimeException {
+    public UpstreamServerErrorException() {
       super("Upstream returned server error");
     }
   }

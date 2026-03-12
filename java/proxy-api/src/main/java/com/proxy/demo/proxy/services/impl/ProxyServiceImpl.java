@@ -16,9 +16,11 @@ import org.springframework.web.util.UriBuilder;
 
 import java.net.URI;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 import static com.proxy.demo.proxy.exception.ProxyExceptions.invalidRequestException;
+import static com.proxy.demo.proxy.exception.ProxyExceptions.ofUpstreamStatusCode;
 
 @Slf4j
 @Service
@@ -39,27 +41,16 @@ public class ProxyServiceImpl implements ProxyService {
   )
   public LookupResult loadWeatherData(double longitude, double latitude, Map<String, String> sourceParams) {
     try {
-      LookupResult response = weatherRestClientBuilder.build().get()
+      LookupResult response = Optional.ofNullable( weatherRestClientBuilder.build().get()
           .uri(ofParams(sourceParams))
           .retrieve()
-          .body(LookupResult.class);
+          .body(LookupResult.class))
+          .orElseThrow(ProxyExceptions::notFound);
 
-      if (response == null) {
-        log.warn("Upstream returned an empty body for params {}", sourceParams);
-        throw ProxyExceptions.notFound();
-      }
       log.info("Loaded {} {}", sourceParams, response);
       return response;
     } catch (RestClientResponseException ex) {
-      HttpStatusCode statusCode = ex.getStatusCode();
-      log.warn("Upstream error {} {} for params {}", statusCode, ex.getMessage(), sourceParams);
-      if (statusCode.is4xxClientError()) {
-        throw invalidRequestException(
-            "Upstream rejected the request: %s".formatted(statusCode));
-      } else if (statusCode.is5xxServerError()) {
-        throw ProxyExceptions.upstreamException();
-      }
-      throw ex;
+      throw ofUpstreamStatusCode(ex.getStatusCode());
     } catch (ResourceAccessException ex) {
       log.warn("Network error reaching upstream for params {}: {}", sourceParams, ex.getMessage());
       throw ex;

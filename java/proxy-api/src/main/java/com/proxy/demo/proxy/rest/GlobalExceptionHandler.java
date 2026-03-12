@@ -48,8 +48,8 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(body);
   }
 
-  @ExceptionHandler(ProxyExceptions.UpstreamException.class)
-  public ResponseEntity<Map<String, Object>> handleUpstreamException(ProxyExceptions.UpstreamException ex) {
+  @ExceptionHandler(ProxyExceptions.UpstreamServerErrorException.class)
+  public ResponseEntity<Map<String, Object>> handleUpstreamException( ProxyExceptions.UpstreamServerErrorException ex) {
     Map<String, Object> body = Map.of(
         "error", "Upstream server error",
         "message", "Upstream server error",
