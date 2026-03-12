@@ -5,7 +5,6 @@ import com.proxy.demo.proxy.services.api.LookupResult;
 import com.proxy.demo.proxy.services.api.ProxyService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -19,13 +18,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static com.proxy.demo.proxy.exception.ProxyExceptions.invalidRequestException;
 import static com.proxy.demo.proxy.exception.ProxyExceptions.ofUpstreamStatusCode;
 
 @Slf4j
 @Service
 public class ProxyServiceImpl implements ProxyService {
 
+  //TODO: siongel  RestClient + get messages and forward to client
   private final RestClient.Builder weatherRestClientBuilder;
 
   public ProxyServiceImpl(RestClient.Builder weatherRestClientBuilder) {
