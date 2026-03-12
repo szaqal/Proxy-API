@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 public class LookupResult {
 
+  @JsonProperty("current")
   private Current current;
 
   @Data

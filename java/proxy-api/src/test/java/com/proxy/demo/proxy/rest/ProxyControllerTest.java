@@ -17,6 +17,8 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+
+//TODO: test of timeouts
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ProxyControllerTest {
 
@@ -26,16 +28,15 @@ class ProxyControllerTest {
   @Autowired
   private ProxyService proxyService;
 
-  @Autowired
-  private RestClient.Builder restClientBuilder;
-
   private MockMvc mockMvc;
   private MockRestServiceServer mockServer;
 
   @BeforeEach
   void setUp() {
     mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-    mockServer = MockRestServiceServer.bindTo(restClientBuilder).build();
+    mockServer = MockRestServiceServer.bindTo(RestClient.builder()
+        .baseUrl("https://api.open-meteo.com/"))
+        .build();
   }
 
   @Test
@@ -105,4 +106,5 @@ class ProxyControllerTest {
 
     mockServer.verify();
   }
+
 }
