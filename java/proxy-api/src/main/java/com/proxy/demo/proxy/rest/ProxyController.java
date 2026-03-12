@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -13,9 +14,9 @@ public class ProxyController {
 
   private final ProxyService proxyService;
 
-  @GetMapping("/aaa")
-  public String test() {
-    proxyService.loadWeatherData();
+  @GetMapping("/forecast")
+  public String forecast(@RequestParam Map<String, String> params) {
+    proxyService.loadWeatherData(params);
     return "OK";
   }
 }
