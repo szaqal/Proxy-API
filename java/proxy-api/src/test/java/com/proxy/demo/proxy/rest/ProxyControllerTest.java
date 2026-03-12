@@ -13,9 +13,13 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withException;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 
 
 //TODO: test of timeouts
@@ -124,6 +128,42 @@ class ProxyControllerTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.error").value("Not Found"))
         .andExpect(jsonPath("$.message").value("Resource not found"));
+
+    mockServer.verify();
+  }
+
+  @Test
+  void forecast_shouldReturn504WhenReadTimeout() throws Exception {
+    mockServer.expect(requestTo(containsString("https://api.open-meteo.com/v1/forecast")))
+        .andRespond(withException(new SocketTimeoutException("Read timed out")));
+
+    mockMvc.perform(get("/forecast")
+            .param("latitude", "52.52")
+            .param("longitude", "13.41")
+            .param("current", "temperature_2m,wind_speed_10m")
+        )
+        .andExpect(status().isGatewayTimeout())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.error").value("Gateway Timeout"))
+        .andExpect(jsonPath("$.message").value("Request to upstream service timed out"));
+
+    mockServer.verify();
+  }
+
+  @Test
+  void forecast_shouldReturn504WhenConnectionTimeout() throws Exception {
+    mockServer.expect(requestTo(containsString("https://api.open-meteo.com/v1/forecast")))
+        .andRespond(withException(new ConnectException("Connection refused")));
+
+    mockMvc.perform(get("/forecast")
+            .param("latitude", "52.52")
+            .param("longitude", "13.41")
+            .param("current", "temperature_2m,wind_speed_10m")
+        )
+        .andExpect(status().isGatewayTimeout())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.error").value("Gateway Timeout"))
+        .andExpect(jsonPath("$.message").value("Request to upstream service timed out"));
 
     mockServer.verify();
   }
