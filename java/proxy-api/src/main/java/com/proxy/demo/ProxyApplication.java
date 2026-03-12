@@ -13,6 +13,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.web.client.RestClient;
 
 import java.time.Duration;
@@ -22,6 +23,7 @@ import static java.time.Duration.ofSeconds;
 
 @SpringBootApplication
 @EnableCaching
+@EnableRetry
 public class ProxyApplication {
 
 	public static void main(String[] args) {
@@ -62,6 +64,7 @@ public class ProxyApplication {
    * <ol>
    * <li>URL should be configurable</li>
    * <li>Timeouts configurable</li>
+   * <li>Retry configuration</li>
    * </ol>
    */
   @Bean

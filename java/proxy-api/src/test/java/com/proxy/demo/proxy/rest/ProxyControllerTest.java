@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.web.client.ExpectedCount;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -168,7 +169,8 @@ class ProxyControllerTest {
 
   @Test
   void forecast_shouldReturn504WhenConnectionTimeout() throws Exception {
-    mockServer.expect(requestTo(containsString("https://api.open-meteo.com/v1/forecast")))
+    //with retries
+    mockServer.expect(ExpectedCount.times(3), requestTo(containsString("https://api.open-meteo.com/v1/forecast")))
         .andRespond(withException(new ConnectException("Connection refused")));
 
     mockMvc.perform(get("/forecast")
