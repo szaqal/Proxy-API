@@ -39,7 +39,7 @@ public class ProxyExceptions {
 
   public static class UpstreamException extends RuntimeException {
     public UpstreamException() {
-      super("Upstream returned error");
+      super("Upstream returned server error");
     }
   }
 }
