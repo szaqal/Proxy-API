@@ -47,4 +47,15 @@ public class GlobalExceptionHandler {
     log.debug("Upstream service timeout: {}", ex.getMessage());
     return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(body);
   }
+
+  @ExceptionHandler(ProxyExceptions.UpstreamException.class)
+  public ResponseEntity<Map<String, Object>> handleUpstreamException(ProxyExceptions.UpstreamException ex) {
+    Map<String, Object> body = Map.of(
+        "error", "Upstream server error",
+        "message", "Upstream server error",
+        "timestamp", Instant.now().toString()
+    );
+    log.debug("Upstream service failed: {}", ex.getMessage());
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
+  }
 }

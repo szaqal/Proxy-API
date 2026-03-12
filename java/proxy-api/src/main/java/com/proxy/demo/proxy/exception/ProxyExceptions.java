@@ -17,10 +17,16 @@ public class ProxyExceptions {
     return new InvalidRequestException("Missing either longitude or latitude");
   }
 
+  public static UpstreamException upstreamException() {
+    return new UpstreamException();
+  }
+
 
   public static InvalidRequestException invalidRequestException(String message) {
     return new InvalidRequestException(message);
   }
+
+
 
 
   public static class NotFoundException extends RuntimeException { }
@@ -28,6 +34,12 @@ public class ProxyExceptions {
   public static class InvalidRequestException extends RuntimeException {
     public InvalidRequestException(String message) {
       super(message);
+    }
+  }
+
+  public static class UpstreamException extends RuntimeException {
+    public UpstreamException() {
+      super("Upstream returned server error");
     }
   }
 }
