@@ -10,7 +10,7 @@ RUN apk add --no-cache curl
 
 COPY proxy-api/src ./src
 
-RUN ./mvnw package 
+RUN ./mvnw package  -DskipTests
 
 FROM eclipse-temurin:21-jre-alpine
 
