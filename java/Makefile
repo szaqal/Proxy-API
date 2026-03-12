@@ -2,6 +2,7 @@ artifact_id=proxy-api
 group_id=com.proxy.demo
 current_version=0.0.1
 tag=$(current_version)-$(shell git rev-parse --short HEAD) 
+published_image_tag=0.0.1-fbf344f
 
 
 init-mvn:
@@ -51,7 +52,7 @@ pods:
 	minikube kubectl -- get pods -A
 
 helm-install:
-	helm install proxy-api helm/proxy-api
+	helm install proxy-api helm/proxy-api --set image.tag=$(published_image_tag)
 
 helm-upgrade:
 	helm upgrade proxy-api helm/proxy-api

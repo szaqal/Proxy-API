@@ -33,6 +33,7 @@ What could be considered (ADRs):
 
 * NOT adding (NOW) Externalize TTL for cache as config
 
+* NOT adding (NOW) any gitops ArgoCD, Flux etc...
 
 [Swagger](http://localhost:8080/swagger-ui/index.html)
 
