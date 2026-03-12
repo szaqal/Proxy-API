@@ -45,6 +45,9 @@ bench:
 minikube-start:
 	minikube start --cpus 4 --memory 8000 --nodes=1
 
+minikube-enable-ingress:
+	minikube addons enable ingress
+
 minikube-delete:
 	minikube delete
 

@@ -40,7 +40,7 @@ redis:
 
 ingress:
   enabled: true
-  className: ""
+  className: nginx
   annotations: {}
   hosts:
     - host: proxy-api.local
