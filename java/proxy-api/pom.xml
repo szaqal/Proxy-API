@@ -28,7 +28,7 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
-		<owasp.dependency-check.version>12.10.1</owasp.dependency-check.version>
+		<owasp.dependency-check.version>12.2.0</owasp.dependency-check.version>
 		<owasp.failBuildOnCVSS>7</owasp.failBuildOnCVSS>
 	</properties>
 	<dependencies>
