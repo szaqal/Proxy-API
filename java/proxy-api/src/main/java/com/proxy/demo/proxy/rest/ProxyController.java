@@ -3,6 +3,9 @@ package com.proxy.demo.proxy.rest;
 import com.proxy.demo.proxy.exception.ProxyExceptions;
 import com.proxy.demo.proxy.services.api.LookupResult;
 import com.proxy.demo.proxy.services.api.ProxyService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -14,9 +17,11 @@ import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "Weather Forecast", description = "Proxy API for weather data")
 public class ProxyController {
 
   private final ProxyService proxyService;
+
 
   /**
    * Task doesn't cleary states what this API should accept as input and how to validate hence
@@ -26,8 +31,10 @@ public class ProxyController {
    *
    * We can be sure that either  latitude/longitude are required.
    */
+  @Operation(summary = "Get weather forecast", description = "Returns weather data for given coordinates")
   @GetMapping("/forecast")
-  public Response forecast(@RequestParam Map<String, String> params) {
+  public Response forecast(
+      @Parameter(description = "Latitude of the location") @RequestParam Map<String, String> params) {
 
     Double latitude = Optional.ofNullable(params.get("latitude"))
         .map(Double::parseDouble)
