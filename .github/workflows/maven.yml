@@ -81,11 +81,9 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Build and push Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: java
-        file: java/Dockerfile.publish
-        push: true
-        tags: |
-          szaqal/proxy-api:latest
-          szaqal/proxy-api:${{ github.run_number }}
+      run: |
+        SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+        TAG_NAME=0.0.1-${SHORT_SHA}
+        docker build -f java/Dockerfile.publish -t szaqal/proxy-api:latest -t szaqal/proxy-api:${TAG_NAME} java/
+        docker push szaqal/proxy-api:latest
+        docker push szaqal/proxy-api:${TAG_NAME}
