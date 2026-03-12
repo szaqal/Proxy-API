@@ -14,4 +14,6 @@ TODO:
 ---
 * OpenAPI
 * OpenTelemetry
+* Retrues
+* Circut breaker
 
