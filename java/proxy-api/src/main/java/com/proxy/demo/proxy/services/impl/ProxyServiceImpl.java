@@ -1,5 +1,6 @@
 package com.proxy.demo.proxy.services.impl;
 
+import com.proxy.demo.proxy.services.api.LookupResult;
 import com.proxy.demo.proxy.services.api.ProxyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,13 +21,14 @@ public class ProxyServiceImpl implements ProxyService {
 
 
   @Override
-  public void loadWeatherData(Map<String, String> params) {
-    String response = weatherRestClient.get()
+  public LookupResult loadWeatherData(Map<String, String> params) {
+    LookupResult response = weatherRestClient.get()
         .uri(ofParams(params))
         .retrieve()
-        .body(String.class);
+        .body(LookupResult.class);
 
     log.info("Loaded {} {}", params, response);
+    return response;
   }
 
   private static Function<UriBuilder, URI> ofParams( Map<String, String> params ) {
