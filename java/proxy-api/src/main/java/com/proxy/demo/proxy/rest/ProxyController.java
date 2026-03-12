@@ -33,14 +33,16 @@ public class ProxyController {
       throw new ProxyExceptions.InvalidRequestException("Missing either longitude or latitude");
     }
 
-    //400 if missing long or lat
-    //404 if empty
     return Optional.ofNullable(proxyService.loadWeatherData(params))
         .map(this::asResponse)
         .orElseThrow(ProxyExceptions::notFound);
   }
 
   private Response asResponse(LookupResult lookupResult) {
+    if(lookupResult.getCurrent() == null) {
+      throw ProxyExceptions.notFound();
+    }
+
     return new Response("open-meteo", Instant.now(),
             new Current(lookupResult.getCurrent().getTemperature(), lookupResult.getCurrent().getWindSpeed()));
   }

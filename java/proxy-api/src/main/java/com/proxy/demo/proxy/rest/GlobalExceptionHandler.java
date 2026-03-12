@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.ResourceAccessException;
 
 import java.time.Instant;
 import java.util.Map;
@@ -34,5 +35,16 @@ public class GlobalExceptionHandler {
     );
     log.debug(ex.getMessage());
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+  }
+
+  @ExceptionHandler(ResourceAccessException.class)
+  public ResponseEntity<Map<String, Object>> handleResourceAccessException(ResourceAccessException ex) {
+    Map<String, Object> body = Map.of(
+        "error", "Gateway Timeout",
+        "message", "Request to upstream service timed out",
+        "timestamp", Instant.now().toString()
+    );
+    log.debug("Upstream service timeout: {}", ex.getMessage());
+    return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(body);
   }
 }

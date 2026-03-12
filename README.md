@@ -9,9 +9,28 @@ Assumptions:
 
 * No security requiremensts hence no AuthN or AuthZ implemented
 
+What could be considered (ADRs):
+---
+
+* Spring Boot there werent any constraints there alternative approach may be, selected mainy due to all building blocks in place. 
+  * No frameworks simple servlet with manuall connection handling - smaller resource footprint at a cost of maintanability and work effort (obervability etc..)
+  * Some none blocking server like Netty some as above
+  * Some other DI frameworks would probably be dependent on collective knowledge.
+
+
+
+* NOT adding (NOW) Circuit breaker now since this is external system so we may not be that much concerned, unless API rate limiting is implemented on the other side.
+
+* NOT adding (NOW) Reactive Webclient instead of RestClient if load specific justifies it. Without such information I value more maintainability, but could be swtiched if needed.
+
+* NOT adding (NOW) Cache hierarchy Local -> Redis to increas a bit resilience if Redis get unavailable. (Skip for now)
+
+
 
 TODO:
 ---
 * OpenAPI
 * OpenTelemetry
+* Retrues
+
 
