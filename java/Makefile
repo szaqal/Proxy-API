@@ -33,3 +33,6 @@ build-java:
 run-java:
 	java -jar proxy-api/target/proxy-api-$(current_version)-SNAPSHOT.jar
 
+bench:
+	ab -n 100 -c 100 "http://localhost:8080/forecast?latitude=52.52&longitude=13.41&current=temperature_2m,wind_speed_10m"
+
