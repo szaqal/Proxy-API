@@ -109,4 +109,23 @@ class ProxyControllerTest {
     mockServer.verify();
   }
 
+  @Test
+  void forecast_shouldReturn404WhenNoCurrentProvided() throws Exception {
+    // Given
+    mockServer.expect(requestTo(containsString("https://api.open-meteo.com/v1/forecast")))
+        .andRespond(withSuccess("{}", MediaType.APPLICATION_JSON));
+
+    // When & Then
+    mockMvc.perform(get("/forecast")
+            .param("latitude", "0")
+            .param("longitude", "0")
+        )
+        .andExpect(status().isNotFound())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.error").value("Not Found"))
+        .andExpect(jsonPath("$.message").value("Resource not found"));
+
+    mockServer.verify();
+  }
+
 }
