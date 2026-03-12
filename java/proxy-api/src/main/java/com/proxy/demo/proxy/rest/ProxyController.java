@@ -40,6 +40,10 @@ public class ProxyController {
   }
 
   private Response asResponse(LookupResult lookupResult) {
+    if(lookupResult.getCurrent() == null) {
+      throw ProxyExceptions.notFound();
+    }
+
     return new Response("open-meteo", Instant.now(),
             new Current(lookupResult.getCurrent().getTemperature(), lookupResult.getCurrent().getWindSpeed()));
   }
