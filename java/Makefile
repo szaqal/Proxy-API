@@ -49,3 +49,12 @@ minikube-delete:
 
 pods:
 	minikube kubectl -- get pods -A
+
+helm-install:
+	helm install proxy-api helm/proxy-api
+
+helm-upgrade:
+	helm upgrade proxy-api helm/proxy-api
+
+helm-uninstall:
+	helm uninstall proxy-api
