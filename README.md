@@ -37,55 +37,6 @@ What could be considered (ADRs):
 
 [Swagger](http://localhost:8080/swagger-ui/index.html)
 
-Example
----
-
-```bash
-make ab-bench
-ab -n 100 -c 100 "http://localhost:8080/forecast?latitude=52.52&longitude=13.41&current=temperature_2m,wind_speed_10m"
-This is ApacheBench, Version 2.3 <$Revision: 1903618 $>
-Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
-Licensed to The Apache Software Foundation, http://www.apache.org/
-
-Benchmarking localhost (be patient).....done
-
-
-Server Software:        
-Server Hostname:        localhost
-Server Port:            8080
-
-Document Path:          /forecast?latitude=52.52&longitude=13.41&current=temperature_2m,wind_speed_10m
-Document Length:        117 bytes
-
-Concurrency Level:      100
-Time taken for tests:   0.025 seconds
-Complete requests:      100
-Failed requests:        0
-Total transferred:      22200 bytes
-HTML transferred:       11700 bytes
-Requests per second:    3953.82 [#/sec] (mean)
-Time per request:       25.292 [ms] (mean)
-Time per request:       0.253 [ms] (mean, across all concurrent requests)
-Transfer rate:          857.18 [Kbytes/sec] received
-
-Connection Times (ms)
-              min  mean[+/-sd] median   max
-Connect:        0    3   0.7      3       4
-Processing:     7   14   1.8     14      17
-Waiting:        3   14   2.0     14      17
-Total:          7   18   1.9     17      20
-
-Percentage of the requests served within a certain time (ms)
-  50%     17
-  66%     19
-  75%     19
-  80%     19
-  90%     20
-  95%     20
-  98%     20
-  99%     20
- 100%     20 (longest request)
-```
 
 TODO:
 ---

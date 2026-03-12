@@ -103,6 +103,8 @@
 					  <nvdApiDelay>4000</nvdApiDelay>       <!-- ms between requests -->
 					  <nvdApiResultsPerPage>2000</nvdApiResultsPerPage>
 					  <nvdApiMaxRetryCount>10</nvdApiMaxRetryCount>
+					  <connectionTimeout>30000</connectionTimeout>
+					  <readTimeout>30000</readTimeout>
 				</configuration>
 			</plugin>
 			<plugin>

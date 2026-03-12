@@ -5,7 +5,7 @@ help:
 	@echo ""
 	@echo "Available targets:"
 	@echo "  init-mvn             Initialize a new Spring Boot Maven project"
-	@echo "  checkov-java         Run Checkov security analysis on Dockerfile"
+	@echo "  checkov-java         Run Checkov security analysis on Dockerfile and Helm charts"
 	@echo "  docker-build-java    Build Docker image"
 	@echo "  docker-run-java      Run Docker container"
 	@echo "  docker-stop-java     Stop Docker container"
@@ -43,6 +43,7 @@ init-mvn:
 
 checkov-java:
 	docker run --rm -v $(shell pwd):/work bridgecrew/checkov -f /work/Dockerfile.local --framework dockerfile
+	docker run --rm -v $(shell pwd):/work bridgecrew/checkov -d /work/helm --framework kubernetes
 
 docker-build-java:
 	docker build -t proxy-api:$(tag) -f Dockerfile.local .
