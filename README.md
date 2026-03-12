@@ -9,6 +9,8 @@ Assumptions:
 
 * No security requiremensts hence no AuthN or AuthZ implemented
 
+* Since it the API is specified and it's mean to be proxy all query parameters will be passed AS-IS to origin service. Since the only thing we know is that longitude and latitude are required and validated. Since there the expeced output is provided on the other hand it feels a bit odd since it modifies origin service output. So it's a proxy to some externd and to some not :).
+
 What could be considered (ADRs):
 ---
 
