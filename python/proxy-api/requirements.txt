@@ -1,0 +1,19 @@
+# Flask
+Flask>=3.0.0
+
+# HTTP client with retry support
+requests>=2.31.0
+urllib3>=2.0.0
+
+# Redis for caching
+redis>=5.0.0
+
+# Gunicorn for production WSGI server
+gunicorn>=21.0.0
+
+# Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+
+# Type hints (for development)
+typing-extensions>=4.8.0
