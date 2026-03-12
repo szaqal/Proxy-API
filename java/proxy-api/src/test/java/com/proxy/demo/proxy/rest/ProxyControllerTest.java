@@ -51,20 +51,20 @@ class ProxyControllerTest {
         }
         """;
 
-    mockServer.expect(requestTo("https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&current=temperature_2m,wind_speed_10m"))
+    mockServer.expect(requestTo("https://api.open-meteo.com/v1/forecast"))
         .andRespond(withSuccess(jsonResponse, MediaType.APPLICATION_JSON));
 
     // When & Then
     mockMvc.perform(get("/forecast")
             .param("latitude", "52.52")
             .param("longitude", "13.41")
-            .param("current=temperature_2m,wind_speed_10m")
+            .param("current", "temperature_2m,wind_speed_10m")
         )
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.provider").value("open-meteo"))
-        .andExpect(jsonPath("$.current.temperature").value(22.5))
-        .andExpect(jsonPath("$.current.windSpeed").value(15.3));
+        .andExpect(jsonPath("$.source").value("open-meteo"))
+        .andExpect(jsonPath("$.current.temperatureC").value(22.5))
+        .andExpect(jsonPath("$.current.windSpeedKmh").value(15.3));
 
     mockServer.verify();
   }
@@ -94,14 +94,15 @@ class ProxyControllerTest {
   @Test
   void forecast_shouldReturn404WhenNoDataFound() throws Exception {
     // Given
-    mockServer.expect(requestTo("https://api.open-meteo.com/v1/forecast?latitude=0&longitude=0&current=temperature_2m,wind_speed_10m"))
+    mockServer.expect(requestTo("https://api.open-meteo.com/"))
         .andRespond(withSuccess("{}", MediaType.APPLICATION_JSON));
 
     // When & Then
     mockMvc.perform(get("/forecast")
             .param("latitude", "0")
             .param("longitude", "0")
-            .param("current=temperature_2m,wind_speed_10m"))
+            .param("current","temperature_2m,wind_speed_10m")
+        )
         .andExpect(status().isNotFound())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.error").value("Not Found"))
