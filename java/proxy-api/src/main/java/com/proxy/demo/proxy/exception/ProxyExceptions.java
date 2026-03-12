@@ -6,6 +6,18 @@ public class ProxyExceptions {
     return new NotFoundException();
   }
 
+
+  //TODO: differenciate message
+  public static InvalidRequestException missingLongitude() {
+    return new InvalidRequestException("Missing either longitude or latitude");
+  }
+
+
+  public static InvalidRequestException missingLatitude() {
+    return new InvalidRequestException("Missing either longitude or latitude");
+  }
+
+
   public static InvalidRequestException invalidRequestException(String message) {
     return new InvalidRequestException(message);
   }

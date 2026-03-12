@@ -22,14 +22,14 @@ public class ProxyServiceImpl implements ProxyService {
   }
 
   @Override
-  public LookupResult loadWeatherData(Map<String, String> params) {
+  public LookupResult loadWeatherData(double longitude, double latitude, Map<String, String> sourceParams) {
     //TODO: checks for HTTP error codes for example
     LookupResult response = weatherRestClientBuilder.build().get()
-        .uri(ofParams(params))
+        .uri(ofParams(sourceParams))
         .retrieve()
         .body(LookupResult.class);
 
-    log.info("Loaded {} {}", params, response);
+    log.info("Loaded {} {}", sourceParams, response);
     return response;
   }
 

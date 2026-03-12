@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -29,11 +28,16 @@ public class ProxyController {
    */
   @GetMapping("/forecast")
   public Response forecast(@RequestParam Map<String, String> params) {
-    if(!params.containsKey("latitude") || !params.containsKey("longitude")) {
-      throw new ProxyExceptions.InvalidRequestException("Missing either longitude or latitude");
-    }
 
-    return Optional.ofNullable(proxyService.loadWeatherData(params))
+    Double latitude = Optional.ofNullable(params.get("latitude"))
+        .map(Double::parseDouble)
+        .orElseThrow(ProxyExceptions::missingLatitude);
+
+    Double longitude = Optional.ofNullable(params.get("longitude"))
+        .map(Double::parseDouble)
+        .orElseThrow(ProxyExceptions::missingLongitude);
+
+    return Optional.ofNullable(proxyService.loadWeatherData(longitude, latitude, params))
         .map(this::asResponse)
         .orElseThrow(ProxyExceptions::notFound);
   }
