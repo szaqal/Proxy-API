@@ -92,4 +92,102 @@ TODO:
 * OpenTelemetry
 * Retrues
 
+Tutorial
+---
+
+### Local Development
+
+Initialize a new Spring Boot Maven project:
+```bash
+make init-mvn
+```
+
+Build the application:
+```bash
+make build-java
+```
+
+Run the application locally:
+```bash
+make run-java
+```
+
+### Docker
+
+Build the Docker image:
+```bash
+make docker-build-java
+```
+
+Run the Docker container:
+```bash
+make docker-run-java
+```
+
+View container logs:
+```bash
+make docker-logs
+```
+
+Stop the Docker container:
+```bash
+make docker-stop-java
+```
+
+### Security Scanning
+
+Run Checkov security analysis on the Dockerfile:
+```bash
+make checkov-java
+```
+
+### Benchmarking
+
+Run Apache Bench performance test:
+```bash
+make bench
+```
+
+### Kubernetes (Minikube)
+
+Start Minikube with 4 CPUs and 8GB memory:
+```bash
+make minikube-start
+```
+
+Enable ingress addon:
+```bash
+make minikube-enable-ingress
+```
+
+Deploy the application using Helm:
+```bash
+make k8s-helm-install
+```
+
+Upgrade the Helm deployment:
+```bash
+make k8s-helm-upgrade
+```
+
+View application logs in Kubernetes:
+```bash
+make k8s-proxy-logs
+```
+
+Check the deployed service:
+```bash
+make k8s-check
+```
+
+Uninstall the Helm release:
+```bash
+make k8s-helm-uninstall
+```
+
+Delete the Minikube cluster:
+```bash
+make minikube-delete
+```
+
 

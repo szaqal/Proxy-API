@@ -1,3 +1,28 @@
+.PHONY: help
+
+help:
+	@echo "Proxy-API Makefile"
+	@echo ""
+	@echo "Available targets:"
+	@echo "  init-mvn             Initialize a new Spring Boot Maven project"
+	@echo "  checkov-java         Run Checkov security analysis on Dockerfile"
+	@echo "  docker-build-java    Build Docker image"
+	@echo "  docker-run-java      Run Docker container"
+	@echo "  docker-stop-java     Stop Docker container"
+	@echo "  docker-logs          View Docker container logs"
+	@echo "  build-java           Build Java application with Maven"
+	@echo "  run-java             Run Java application locally"
+	@echo "  bench                Run Apache Bench performance test"
+	@echo "  minikube-start       Start Minikube cluster"
+	@echo "  minikube-enable-ingress Enable ingress addon"
+	@echo "  minikube-delete      Delete Minikube cluster"
+	@echo "  pods                 List Kubernetes pods in proxy namespace"
+	@echo "  k8s-proxy-logs       View application logs in Kubernetes"
+	@echo "  k8s-helm-install     Deploy application with Helm"
+	@echo "  k8s-helm-upgrade     Upgrade Helm deployment"
+	@echo "  k8s-helm-uninstall   Uninstall Helm release"
+	@echo "  k8s-check            Check deployed service"
+
 artifact_id=proxy-api
 group_id=com.proxy.demo
 current_version=0.0.1
