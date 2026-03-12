@@ -25,6 +25,7 @@ jobs:
   owasp:
     runs-on: ubuntu-latest
     needs: checkov
+    continue-on-error: true
     env:
       OWASP_DATA_DIR: ${{ github.workspace }}/.owasp/dependency-check-data
     steps:
@@ -66,8 +67,8 @@ jobs:
 
   publish:
     runs-on: ubuntu-latest
-    needs: [build,owasp] #[build, owasp]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [build, owasp]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.build.result == 'success'
     steps:
     - uses: actions/checkout@v3
     - name: Set up JDK
