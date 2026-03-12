@@ -20,6 +20,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withException;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -165,6 +166,26 @@ class ProxyControllerTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.error").value("Gateway Timeout"))
         .andExpect(jsonPath("$.message").value("Request to upstream service timed out"));
+
+    mockServer.verify();
+  }
+
+  @Test
+  void forecast_shouldReturn500WhenUpstreamReturns5xx() throws Exception {
+    // Given — upstream responds with a 500; no retries expected (only network errors are retried)
+    mockServer.expect(ExpectedCount.once(), requestTo(containsString("https://api.open-meteo.com/v1/forecast")))
+        .andRespond(withServerError());
+
+    // When & Then
+    mockMvc.perform(get("/forecast")
+            .param("latitude", "1.11")
+            .param("longitude", "2.22")
+            .param("current", "temperature_2m,wind_speed_10m")
+        )
+        .andExpect(status().isInternalServerError())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.error").value("Upstream server error"))
+        .andExpect(jsonPath("$.message").value("Upstream server error"));
 
     mockServer.verify();
   }
