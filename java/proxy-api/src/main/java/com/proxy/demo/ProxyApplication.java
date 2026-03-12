@@ -1,5 +1,8 @@
 package com.proxy.demo;
 
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.Contact;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
@@ -26,6 +29,16 @@ public class ProxyApplication {
 	}
 
   @Bean
+  public OpenAPI customOpenAPI() {
+    return new OpenAPI()
+        .info(new Info()
+            .title("Proxy API")
+            .version("1.0")
+            .description("Weather forecast proxy API")
+            .contact(new Contact().name("Demo").email("demo@example.com")));
+  }
+
+  @Bean
   RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
     RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
         .entryTtl(Duration.ofMinutes(10))
@@ -39,7 +52,7 @@ public class ProxyApplication {
         .cacheDefaults(config)
         .withInitialCacheConfigurations(Map.of(
             "weatherCache",
-            RedisCacheConfiguration.defaultCacheConfig().entryTtl(ofSeconds(60))
+            RedisCacheConfiguration.defaultCacheConfig().entryTtl(ofSeconds(60)) //Could be configurable
         ))
         .build();
   }

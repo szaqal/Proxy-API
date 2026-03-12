@@ -7,7 +7,7 @@ public class ProxyExceptions {
   }
 
 
-  //TODO: differenciate message
+  //TODO: differentiate message
   public static InvalidRequestException missingLongitude() {
     return new InvalidRequestException("Missing either longitude or latitude");
   }

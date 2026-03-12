@@ -27,6 +27,9 @@ docker-run-java:
 docker-stop-java:
 	docker-compose -f docker-compose.yml down
 
+docker-logs:
+	docker-compose -f docker-compose.yml logs -f
+
 build-java:
 	proxy-api/mvnw clean package -f proxy-api/pom.xml 
 
