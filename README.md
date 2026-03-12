@@ -16,6 +16,7 @@ What could be considered (ADRs):
 
 * Reactive Webclient instead of RestClient if load specific justifies it. Without such information I value more maintainability.
 
+* Cache hierarchy Local -> Redis to increas a bit resilience if Redis get unavailable. (Skip for now)
 
 
 
@@ -24,5 +25,5 @@ TODO:
 * OpenAPI
 * OpenTelemetry
 * Retrues
-* Circut breaker
+
 
