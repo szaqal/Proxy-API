@@ -5,11 +5,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.context.WebApplicationContext;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
@@ -21,10 +26,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 
+//TODO: add test with caching
 
-//TODO: test of timeouts
+@Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ProxyControllerTest {
+
+  @Container
+  static GenericContainer<?> redis = new GenericContainer<>("redis:7-alpine")
+      .withExposedPorts(6379);
+
+  @DynamicPropertySource
+  static void redisProperties(DynamicPropertyRegistry registry) {
+    registry.add("spring.data.redis.host", redis::getHost);
+    registry.add("spring.data.redis.port", redis::getFirstMappedPort);
+  }
 
   @Autowired
   private WebApplicationContext webApplicationContext;
@@ -101,8 +117,8 @@ class ProxyControllerTest {
 
     // When & Then
     mockMvc.perform(get("/forecast")
-            .param("latitude", "0")
-            .param("longitude", "0")
+            .param("latitude", "10")
+            .param("longitude", "10")
             .param("current","temperature_2m,wind_speed_10m")
         )
         .andExpect(status().isNotFound())
@@ -138,8 +154,8 @@ class ProxyControllerTest {
         .andRespond(withException(new SocketTimeoutException("Read timed out")));
 
     mockMvc.perform(get("/forecast")
-            .param("latitude", "52.52")
-            .param("longitude", "13.41")
+            .param("latitude", "52.55")
+            .param("longitude", "13.45")
             .param("current", "temperature_2m,wind_speed_10m")
         )
         .andExpect(status().isGatewayTimeout())
@@ -156,8 +172,8 @@ class ProxyControllerTest {
         .andRespond(withException(new ConnectException("Connection refused")));
 
     mockMvc.perform(get("/forecast")
-            .param("latitude", "52.52")
-            .param("longitude", "13.41")
+            .param("latitude", "52.53")
+            .param("longitude", "13.42")
             .param("current", "temperature_2m,wind_speed_10m")
         )
         .andExpect(status().isGatewayTimeout())

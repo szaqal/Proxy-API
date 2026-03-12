@@ -4,5 +4,5 @@ import java.util.Map;
 
 public interface ProxyService {
 
-  LookupResult loadWeatherData( Map<String, String> params);
+  LookupResult loadWeatherData(double longitude, double latitude, Map<String, String> sourceParams);
 }

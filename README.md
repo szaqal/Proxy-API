@@ -9,6 +9,8 @@ Assumptions:
 
 * No security requiremensts hence no AuthN or AuthZ implemented
 
+* Since it the API is specified and it's mean to be proxy all query parameters will be passed AS-IS to origin service. Since the only thing we know is that longitude and latitude are required and validated. Since there the expeced output is provided on the other hand it feels a bit odd since it modifies origin service output. So it's a proxy to some externd and to some not :).
+
 What could be considered (ADRs):
 ---
 
@@ -24,6 +26,10 @@ What could be considered (ADRs):
 * NOT adding (NOW) Reactive Webclient instead of RestClient if load specific justifies it. Without such information I value more maintainability, but could be swtiched if needed.
 
 * NOT adding (NOW) Cache hierarchy Local -> Redis to increas a bit resilience if Redis get unavailable. (Skip for now)
+
+* NOT adding (NOW) [Spring config](https://docs.spring.io/spring-cloud-config/docs/current/reference/html/) server and automatic bean reload. 
+
+* Externalize client config socker/read timeout to env variable (configMap)
 
 
 
