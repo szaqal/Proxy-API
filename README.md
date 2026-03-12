@@ -41,7 +41,6 @@ What could be considered (ADRs):
 TODO:
 ---
 * OpenTelemetry
-* Retrues
 
 Tutorial
 ---
