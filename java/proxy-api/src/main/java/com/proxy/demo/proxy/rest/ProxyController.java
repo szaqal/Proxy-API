@@ -33,8 +33,6 @@ public class ProxyController {
       throw new ProxyExceptions.InvalidRequestException("Missing either longitude or latitude");
     }
 
-    //400 if missing long or lat
-    //404 if empty
     return Optional.ofNullable(proxyService.loadWeatherData(params))
         .map(this::asResponse)
         .orElseThrow(ProxyExceptions::notFound);

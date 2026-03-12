@@ -19,9 +19,9 @@ public class ProxyServiceImpl implements ProxyService {
 
   private final RestClient weatherRestClient;
 
-
   @Override
   public LookupResult loadWeatherData(Map<String, String> params) {
+    //TODO: checks for HTTP error codes for example
     LookupResult response = weatherRestClient.get()
         .uri(ofParams(params))
         .retrieve()
