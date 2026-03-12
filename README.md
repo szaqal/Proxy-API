@@ -89,7 +89,6 @@ Percentage of the requests served within a certain time (ms)
 
 TODO:
 ---
-* OpenAPI
 * OpenTelemetry
 * Retrues
 
