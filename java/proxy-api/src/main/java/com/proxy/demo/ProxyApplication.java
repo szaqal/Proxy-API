@@ -44,7 +44,7 @@ public class ProxyApplication {
         .entryTtl(Duration.ofMinutes(10))
         .serializeValuesWith(
             RedisSerializationContext.SerializationPair.fromSerializer(
-                new GenericJackson2JsonRedisSerializer()
+                new GenericJackson2JsonRedisSerializer() //TODO: deprecation fix
             )
         );
 
