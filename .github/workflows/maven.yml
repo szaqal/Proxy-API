@@ -22,32 +22,32 @@ jobs:
         soft_fail: false
         output_format: cli
 
-#  owasp:
-#    runs-on: ubuntu-latest
-#    needs: checkov
-#    steps:
-#    - uses: actions/checkout@v3
-#    - name: Set up JDK
-#      uses: actions/setup-java@v4
-#      with:
-#        java-version: '21'
-#        distribution: 'temurin'
-#    - name: Cache OWASP NVD database
-#      uses: actions/cache@v4
-#      with:
-#        path: ~/.m2/repository/org/owasp/dependency-check-data
-#        key: owasp-nvd-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
-#        restore-keys: owasp-nvd-${{ runner.os }}-
-#    - name: Run OWASP Dependency Check
-#      env:
-#        NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
-#      run: mvn -f java/proxy-api/pom.xml -B dependency-check:check
-#    - name: Upload OWASP report
-#      uses: actions/upload-artifact@v4
-#      if: always()
-#      with:
-#        name: owasp-report
-#        path: java/proxy-api/target/dependency-check-report.*
+  owasp:
+    runs-on: ubuntu-latest
+    needs: checkov
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+    - name: Cache OWASP NVD database
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2/repository/org/owasp/dependency-check-data
+        key: owasp-nvd-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
+        restore-keys: owasp-nvd-${{ runner.os }}-
+    - name: Run OWASP Dependency Check
+      env:
+        NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+      run: mvn -f java/proxy-api/pom.xml -B dependency-check:check
+    - name: Upload OWASP report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: owasp-report
+        path: java/proxy-api/target/dependency-check-report.*
 
   build:
     runs-on: ubuntu-latest
@@ -64,7 +64,7 @@ jobs:
 
   publish:
     runs-on: ubuntu-latest
-    needs: [build] #[build, owasp]
+    needs: [build,owasp] #[build, owasp]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
     - uses: actions/checkout@v3
