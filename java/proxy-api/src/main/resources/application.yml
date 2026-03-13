@@ -6,9 +6,13 @@ management:
   endpoints:
     web:
       exposure:
-        include: health
+        include: health,prometheus,info,metrics
   endpoint:
     health:
       show-details: always
       probes:
+        enabled: true
+  prometheus:
+    metrics:
+      export:
         enabled: true
