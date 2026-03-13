@@ -62,14 +62,6 @@ public class FailedToLoadException extends RuntimeException {
     return new FailedToLoadException(UNAVAILABLE, "Unable to load weather data - data not available");
   }
 
-  public static FailedToLoadException invalidLongitude() {
-    return new FailedToLoadException(INVALID_REQUEST, "Unable to load weather data - invalid longitude");
-  }
-
-  public static FailedToLoadException invalidLatitude() {
-    return new FailedToLoadException(INVALID_REQUEST, "Unable to load weather data - invalid latitude");
-  }
-
   public static RuntimeException ofRestClientException( RestClientResponseException e ) {
 
     /* TODO: We could be more specific there (not only 4xx and 5xx) to apply different strategies based on retirability etc...
