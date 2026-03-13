@@ -1,6 +1,6 @@
 package com.proxy.demo.proxy.rest;
 
-import com.proxy.demo.proxy.exception.ProxyExceptions;
+import com.proxy.demo.proxy.exception.FailedToLoadException;
 import com.proxy.demo.proxy.services.api.LookupResult;
 import com.proxy.demo.proxy.services.api.ProxyService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,23 +38,24 @@ public class ProxyController {
 
     Double latitude = Optional.ofNullable(params.get("latitude"))
         .map(Double::parseDouble)
-        .orElseThrow(ProxyExceptions::missingLatitude);
+        .orElseThrow(FailedToLoadException::invalidLatitude);
 
     Double longitude = Optional.ofNullable(params.get("longitude"))
         .map(Double::parseDouble)
-        .orElseThrow(ProxyExceptions::missingLongitude);
+        .orElseThrow(FailedToLoadException::invalidLongitude);
 
     return Optional.ofNullable(proxyService.loadWeatherData(longitude, latitude, params))
         .map(this::asResponse)
-        .orElseThrow(ProxyExceptions::notAvailable);
+        .orElseThrow(FailedToLoadException::unavailable);
   }
 
   private Response asResponse(LookupResult lookupResult) {
-    if(lookupResult.getCurrent() == null) {
-      throw ProxyExceptions.notAvailable();
-    }
+    return Optional.ofNullable(lookupResult.getCurrent())
+        .map(ProxyController::getResponse)
+        .orElseThrow(FailedToLoadException::unavailable);
+  }
 
-    return new Response("open-meteo", Instant.now(),
-            new Current(lookupResult.getCurrent().getTemperature(), lookupResult.getCurrent().getWindSpeed()));
+  private static Response getResponse( LookupResult.Current lookupCurrent ) {
+    return new Response("open-meteo", Instant.now(), new Current(lookupCurrent.getTemperature(), lookupCurrent.getWindSpeed()));
   }
 }

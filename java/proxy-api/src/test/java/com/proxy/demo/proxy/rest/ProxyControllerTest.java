@@ -1,5 +1,6 @@
 package com.proxy.demo.proxy.rest;
 
+import com.proxy.demo.proxy.exception.FailedToLoadException;
 import com.proxy.demo.proxy.services.impl.ProxyServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import static com.proxy.demo.proxy.exception.FailedToLoadException.Reason.*;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withException;
@@ -102,8 +104,8 @@ class ProxyControllerTest {
             .param("longitude", "13.41"))
         .andExpect(status().isBadRequest())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.error").value("Bad Request"))
-        .andExpect(jsonPath("$.message").value("Missing either longitude or latitude"));
+        .andExpect(jsonPath("$.error").value(INVALID_REQUEST.name()))
+        .andExpect(jsonPath("$.message").value("Unable to load weather data - invalid latitude"));
   }
 
   @Test
@@ -113,8 +115,8 @@ class ProxyControllerTest {
             .param("latitude", "52.52"))
         .andExpect(status().isBadRequest())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.error").value("Bad Request"))
-        .andExpect(jsonPath("$.message").value("Missing either longitude or latitude"));
+        .andExpect(jsonPath("$.error").value(INVALID_REQUEST.name()))
+        .andExpect(jsonPath("$.message").value("Unable to load weather data - invalid longitude"));
   }
 
   @Test
@@ -131,8 +133,8 @@ class ProxyControllerTest {
         )
         .andExpect(status().isNotFound())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.error").value("Not Found"))
-        .andExpect(jsonPath("$.message").value("Resource not found"));
+        .andExpect(jsonPath("$.error").value(UNAVAILABLE.name()))
+        .andExpect(jsonPath("$.message").value("Unable to load weather data - data not available"));
 
     mockServer.verify();
   }
@@ -150,8 +152,8 @@ class ProxyControllerTest {
         )
         .andExpect(status().isNotFound())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.error").value("Not Found"))
-        .andExpect(jsonPath("$.message").value("Resource not found"));
+        .andExpect(jsonPath("$.error").value(UNAVAILABLE.name()))
+        .andExpect(jsonPath("$.message").value("Unable to load weather data - data not available"));
 
     mockServer.verify();
   }
@@ -192,8 +194,8 @@ class ProxyControllerTest {
         )
         .andExpect(status().isInternalServerError())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.error").value("Upstream server error"))
-        .andExpect(jsonPath("$.message").value("Upstream server error"));
+        .andExpect(jsonPath("$.error").value(UPSTREAM_SERVER_ERROR.name()))
+        .andExpect(jsonPath("$.message").value("Unable to load weather data"));
 
     mockServer.verify();
   }

@@ -1,6 +1,6 @@
 package com.proxy.demo.proxy.services.impl;
 
-import com.proxy.demo.proxy.exception.ProxyExceptions;
+import com.proxy.demo.proxy.exception.FailedToLoadException;
 import com.proxy.demo.proxy.services.api.LookupResult;
 import com.proxy.demo.proxy.services.api.ProxyService;
 import lombok.extern.slf4j.Slf4j;
@@ -19,8 +19,6 @@ import java.net.URI;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-
-import static com.proxy.demo.proxy.exception.ProxyExceptions.ofUpstreamStatusCode;
 
 @Slf4j
 @Service
@@ -45,12 +43,12 @@ public class ProxyServiceImpl implements ProxyService {
           .uri(ofParams(sourceParams))
           .retrieve()
           .body(LookupResult.class))
-          .orElseThrow(ProxyExceptions::notAvailable);
+          .orElseThrow(FailedToLoadException::unavailable);
 
       log.info("Loaded {} {}", sourceParams, response);
       return response;
     } catch (RestClientResponseException ex) {
-      throw ofUpstreamStatusCode(ex.getStatusCode());
+      throw FailedToLoadException.ofRestClientException(ex);
     } catch (ResourceAccessException ex) {
       log.warn("Network error reaching upstream for params {}: {}", sourceParams, ex.getMessage());
       throw ex;
