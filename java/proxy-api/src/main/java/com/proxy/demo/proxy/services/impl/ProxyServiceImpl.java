@@ -16,7 +16,6 @@ import org.springframework.web.util.UriBuilder;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -37,28 +36,30 @@ public class ProxyServiceImpl implements ProxyService {
       maxAttempts = 3,
       backoff = @Backoff(delay = 1000, multiplier = 2)
   )
-  public LookupResult loadWeatherData(double longitude, double latitude, Map<String, String> sourceParams) {
+  public LookupResult loadWeatherData(double longitude, double latitude) {
     try {
       LookupResult response = Optional.ofNullable(weatherRestClient.get()
-          .uri(ofParams(sourceParams))
+          .uri(ofParams(longitude, latitude))
           .retrieve()
           .body(LookupResult.class))
           .orElseThrow(FailedToLoadException::unavailable);
 
-      log.info("Loaded {} {}", sourceParams, response);
+      log.info("Loaded {}", response);
       return response;
     } catch (RestClientResponseException ex) {
       throw FailedToLoadException.ofRestClientException(ex);
     } catch (ResourceAccessException ex) {
-      log.warn("Network error reaching upstream for params {}: {}", sourceParams, ex.getMessage());
+      log.warn("Network error reaching upstream for params {}:", ex.getMessage());
       throw ex;
     }
   }
 
-  private static Function<UriBuilder, URI> ofParams( Map<String, String> params ) {
+  private static Function<UriBuilder, URI> ofParams(double longitude, double latitude) {
     return uriBuilder -> {
-      uriBuilder.path("/v1/forecast");
-      params.forEach(uriBuilder::queryParam);
+      uriBuilder.path("/v1/forecast")
+          .queryParam("latitude", latitude)
+          .queryParam("longitude", longitude)
+          .queryParam("current", "temperature_2m,wind_speed_10m");
       return uriBuilder.build();
     };
   }

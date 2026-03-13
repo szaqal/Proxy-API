@@ -6,17 +6,20 @@ import com.proxy.demo.proxy.services.api.ProxyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
-import java.util.Map;
 import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
+@Validated
 @Tag(name = "Weather Forecast", description = "Proxy API for weather data")
 public class ProxyController {
 
@@ -34,25 +37,12 @@ public class ProxyController {
   @Operation(summary = "Get weather forecast", description = "Returns weather data for given coordinates")
   @GetMapping("/forecast")
   public Response forecast(
-      @Parameter(description = "Latitude of the location") @RequestParam Map<String, String> params) {
+      @Parameter(description = "Latitude of the location", required = true)
+      @RequestParam @Min(-90) @Max(90) Double latitude,
+      @Parameter(description = "Longitude of the location", required = true)
+      @RequestParam @Min(-180) @Max(180) Double longitude) {
 
-    /*
-     * Here the could be some sort of while listing of params but assuming my understanding of task
-     * that this is just a proxy we would need to apply all origin's validation rules.
-     */
-
-
-    Double latitude = Optional.ofNullable(params.get("latitude"))
-        .map(Double::parseDouble)
-        .filter(x-> x >= -90 && x <= 90)
-        .orElseThrow(FailedToLoadException::invalidLatitude);
-
-    Double longitude = Optional.ofNullable(params.get("longitude"))
-        .map(Double::parseDouble)
-        .filter(x -> x >= -180 && x <= 180)
-        .orElseThrow(FailedToLoadException::invalidLongitude);
-
-    return Optional.ofNullable(proxyService.loadWeatherData(longitude, latitude, params))
+    return Optional.ofNullable(proxyService.loadWeatherData(longitude, latitude))
         .map(this::asResponse)
         .orElseThrow(FailedToLoadException::unavailable);
   }
