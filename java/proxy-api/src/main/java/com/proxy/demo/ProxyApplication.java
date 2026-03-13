@@ -37,8 +37,7 @@ public class ProxyApplication {
         .info(new Info()
             .title("Proxy API")
             .version("1.0")
-            .description("Weather forecast proxy API")
-            .contact(new Contact().name("Demo").email("demo@example.com")));
+            .description("Weather forecast proxy API"));
   }
 
   @Bean
