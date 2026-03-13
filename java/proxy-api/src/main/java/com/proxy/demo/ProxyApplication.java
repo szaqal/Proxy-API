@@ -40,7 +40,7 @@ public class ProxyApplication {
   }
 
   @Bean
-  RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+  RedisCacheManager cacheManager(@Value("${LOOKUP_TTL:60}") Integer lookupTTL,  RedisConnectionFactory connectionFactory) {
     RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
         .entryTtl(Duration.ofMinutes(10))
         .serializeValuesWith(
@@ -53,7 +53,7 @@ public class ProxyApplication {
         .cacheDefaults(config)
         .withInitialCacheConfigurations(Map.of(
             "weatherCache",
-            RedisCacheConfiguration.defaultCacheConfig().entryTtl(ofSeconds(60)) //Could be configurable
+            RedisCacheConfiguration.defaultCacheConfig().entryTtl(ofSeconds(lookupTTL))
         ))
         .build();
   }
