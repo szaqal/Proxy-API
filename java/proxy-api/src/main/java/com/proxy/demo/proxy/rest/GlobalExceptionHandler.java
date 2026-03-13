@@ -10,6 +10,7 @@ import org.springframework.web.client.ResourceAccessException;
 
 import java.time.Instant;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @RestControllerAdvice
@@ -26,11 +27,11 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
   }
 
-  @ExceptionHandler(ProxyExceptions.NotFoundException.class)
-  public ResponseEntity<Map<String, Object>> handleNotFound(ProxyExceptions.NotFoundException ex) {
+  @ExceptionHandler(ProxyExceptions.NotAvailableException.class)
+  public ResponseEntity<Map<String, Object>> handleNotFound( ProxyExceptions.NotAvailableException ex) {
     Map<String, Object> body = Map.of(
         "error", "Not Found",
-        "message", "Resource not found",
+        "message", Optional.ofNullable(ex.getMessage()).orElse("Resource not found"),
         "timestamp", Instant.now().toString()
     );
     log.debug(ex.getMessage());

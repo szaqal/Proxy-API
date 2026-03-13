@@ -1,5 +1,6 @@
 package com.proxy.demo.proxy.rest;
 
+import com.proxy.demo.proxy.services.impl.ProxyServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,8 +8,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.client.ExpectedCount;
 import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.test.web.client.RequestMatcher;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.client.RestClient;
@@ -26,9 +29,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.net.ConnectException;
-import java.net.SocketTimeoutException;
 
-//TODO: add test with caching
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -50,6 +51,9 @@ class ProxyControllerTest {
   @Autowired
   private RestClient.Builder weatherRestClientBuilder;
 
+  @Autowired
+  private ProxyServiceImpl proxyService;
+
   private MockMvc mockMvc;
   private MockRestServiceServer mockServer;
 
@@ -57,6 +61,8 @@ class ProxyControllerTest {
   void setUp() {
     mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
     mockServer = MockRestServiceServer.bindTo(weatherRestClientBuilder).build();
+    RestClient mockClient = weatherRestClientBuilder.build();
+    ReflectionTestUtils.setField(proxyService, "weatherRestClient", mockClient);
   }
 
   @Test
@@ -71,7 +77,7 @@ class ProxyControllerTest {
         }
         """;
 
-    mockServer.expect(requestTo(containsString("https://api.open-meteo.com/v1/forecast")))
+    mockServer.expect(meteoRequest())
         .andRespond(withSuccess(jsonResponse, MediaType.APPLICATION_JSON));
 
     // When & Then
@@ -114,7 +120,7 @@ class ProxyControllerTest {
   @Test
   void forecast_shouldReturn404WhenNoDataFound() throws Exception {
     // Given
-    mockServer.expect(requestTo(containsString("https://api.open-meteo.com/v1/forecast")))
+    mockServer.expect(meteoRequest())
         .andRespond(withSuccess("{}", MediaType.APPLICATION_JSON));
 
     // When & Then
@@ -134,7 +140,7 @@ class ProxyControllerTest {
   @Test
   void forecast_shouldReturn404WhenNoCurrentProvided() throws Exception {
     // Given
-    mockServer.expect(requestTo(containsString("https://api.open-meteo.com/v1/forecast")))
+    mockServer.expect(meteoRequest())
         .andRespond(withSuccess("{}", MediaType.APPLICATION_JSON));
 
     // When & Then
@@ -154,7 +160,7 @@ class ProxyControllerTest {
   @Test
   void forecast_shouldReturn504WhenConnectionTimeout() throws Exception {
     //with retries
-    mockServer.expect(ExpectedCount.times(3), requestTo(containsString("https://api.open-meteo.com/v1/forecast")))
+    mockServer.expect(ExpectedCount.times(3), meteoRequest())
         .andRespond(withException(new ConnectException("Connection refused")));
 
     mockMvc.perform(get("/forecast")
@@ -170,10 +176,12 @@ class ProxyControllerTest {
     mockServer.verify();
   }
 
+
+
   @Test
   void forecast_shouldReturn500WhenUpstreamReturns5xx() throws Exception {
     // Given — upstream responds with a 500; no retries expected (only network errors are retried)
-    mockServer.expect(ExpectedCount.once(), requestTo(containsString("https://api.open-meteo.com/v1/forecast")))
+    mockServer.expect(ExpectedCount.once(), meteoRequest())
         .andRespond(withServerError());
 
     // When & Then
@@ -190,4 +198,7 @@ class ProxyControllerTest {
     mockServer.verify();
   }
 
+  private static RequestMatcher meteoRequest() {
+    return requestTo(containsString("https://api.open-meteo.com/v1/forecast"));
+  }
 }

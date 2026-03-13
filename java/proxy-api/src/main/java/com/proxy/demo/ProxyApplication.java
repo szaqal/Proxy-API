@@ -2,7 +2,7 @@ package com.proxy.demo;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.info.Contact;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
@@ -36,12 +36,11 @@ public class ProxyApplication {
         .info(new Info()
             .title("Proxy API")
             .version("1.0")
-            .description("Weather forecast proxy API")
-            .contact(new Contact().name("Demo").email("demo@example.com")));
+            .description("Weather forecast proxy API"));
   }
 
   @Bean
-  RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+  RedisCacheManager cacheManager(@Value("${LOOKUP_TTL:60}") Integer lookupTTL,  RedisConnectionFactory connectionFactory) {
     RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
         .entryTtl(Duration.ofMinutes(10))
         .serializeValuesWith(
@@ -54,7 +53,7 @@ public class ProxyApplication {
         .cacheDefaults(config)
         .withInitialCacheConfigurations(Map.of(
             "weatherCache",
-            RedisCacheConfiguration.defaultCacheConfig().entryTtl(ofSeconds(60)) //Could be configurable
+            RedisCacheConfiguration.defaultCacheConfig().entryTtl(ofSeconds(lookupTTL))
         ))
         .build();
   }
@@ -68,14 +67,22 @@ public class ProxyApplication {
    * </ol>
    */
   @Bean
-  RestClient.Builder weatherRestClientBuilder() {
+  RestClient.Builder weatherRestClientBuilder(
+      @Value("${WEATHER_API_BASE_URL:https://api.open-meteo.com/}") String baseUrl,
+      @Value("${WEATHER_API_CONN_TIMEOUT:1s}") Duration connectTimeout,
+      @Value("${WEATHER_API_READ_TIMEOUT:1s}") Duration readTimeout) {
     var requestFactory = new SimpleClientHttpRequestFactory();
-    requestFactory.setConnectTimeout(ofSeconds(1));
-    requestFactory.setReadTimeout(ofSeconds(1));
+    requestFactory.setConnectTimeout(connectTimeout);
+    requestFactory.setReadTimeout(readTimeout);
 
     return RestClient.builder()
       .requestFactory(requestFactory)
-      .baseUrl("https://api.open-meteo.com/");
+      .baseUrl(baseUrl);
+  }
+
+  @Bean
+  RestClient weatherRestClient(RestClient.Builder builder) {
+    return builder.build();
   }
 
 

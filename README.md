@@ -140,5 +140,13 @@ Delete the Minikube cluster:
 make minikube-delete
 ```
 
+Tested
+---
 
+### Redis Cache Key
 
+* ![sc1](scr1.png)
+
+### OpenAPI
+
+* ![sc2](scr2.png)
