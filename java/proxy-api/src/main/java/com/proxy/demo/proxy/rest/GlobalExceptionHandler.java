@@ -1,6 +1,6 @@
 package com.proxy.demo.proxy.rest;
 
-import com.proxy.demo.proxy.exception.ProxyExceptions;
+import com.proxy.demo.proxy.exception.FailedToLoadException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +10,6 @@ import org.springframework.web.client.ResourceAccessException;
 
 import java.time.Instant;
 import java.util.Map;
-import java.util.Optional;
 
 @Slf4j
 @RestControllerAdvice
@@ -27,16 +26,6 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
   }
 
-  @ExceptionHandler(ProxyExceptions.NotAvailableException.class)
-  public ResponseEntity<Map<String, Object>> handleNotFound( ProxyExceptions.NotAvailableException ex) {
-    Map<String, Object> body = Map.of(
-        "error", "Not Found",
-        "message", Optional.ofNullable(ex.getMessage()).orElse("Resource not found"),
-        "timestamp", Instant.now().toString()
-    );
-    log.debug(ex.getMessage());
-    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
-  }
 
   @ExceptionHandler(ResourceAccessException.class)
   public ResponseEntity<Map<String, Object>> handleResourceAccessException(ResourceAccessException ex) {
@@ -49,14 +38,16 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(body);
   }
 
-  @ExceptionHandler(ProxyExceptions.UpstreamServerErrorException.class)
-  public ResponseEntity<Map<String, Object>> handleUpstreamException( ProxyExceptions.UpstreamServerErrorException ex) {
+  @ExceptionHandler(FailedToLoadException.class)
+  public ResponseEntity<Map<String, Object>> handleResourceAccessException(FailedToLoadException ex) {
     Map<String, Object> body = Map.of(
-        "error", "Upstream server error",
-        "message", "Upstream server error",
+        "error", "Gateway Timeout",
+        "message", "Request to upstream service timed out",
         "timestamp", Instant.now().toString()
     );
-    log.debug("Upstream service failed: {}", ex.getMessage());
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
+    log.debug("Upstream service timeout: {}", ex.getMessage());
+    return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(body);
   }
+
+
 }

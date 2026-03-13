@@ -26,7 +26,7 @@ import static java.time.Duration.ofSeconds;
 @EnableRetry
 public class ProxyApplication {
 
-	public static void main(String[] args) {
+  public static void main(String[] args) {
 		SpringApplication.run(ProxyApplication.class, args);
 	}
 
