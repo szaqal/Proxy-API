@@ -1,6 +1,17 @@
 spring:
   application:
-    name: demo
+    name: proxy-api
+
+logging:
+  level:
+    root: INFO
+    com.proxy.demo: DEBUG
+    org.springframework.web: INFO
+    org.springframework.boot.actuate: INFO
+    io.micrometer: INFO
+    io.opentelemetry: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
 
 management:
   endpoints:
