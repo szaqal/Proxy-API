@@ -80,5 +80,10 @@ public class ProxyApplication {
       .baseUrl(baseUrl);
   }
 
+  @Bean
+  RestClient weatherRestClient(RestClient.Builder builder) {
+    return builder.build();
+  }
+
 
 }

@@ -26,11 +26,10 @@ import static com.proxy.demo.proxy.exception.ProxyExceptions.ofUpstreamStatusCod
 @Service
 public class ProxyServiceImpl implements ProxyService {
 
-  //TODO: siongel  RestClient + get messages and forward to client
-  private final RestClient.Builder weatherRestClientBuilder;
+  private final RestClient weatherRestClient;
 
-  public ProxyServiceImpl(RestClient.Builder weatherRestClientBuilder) {
-    this.weatherRestClientBuilder = weatherRestClientBuilder;
+  public ProxyServiceImpl(RestClient weatherRestClient) {
+    this.weatherRestClient = weatherRestClient;
   }
 
   @Override
@@ -42,7 +41,7 @@ public class ProxyServiceImpl implements ProxyService {
   )
   public LookupResult loadWeatherData(double longitude, double latitude, Map<String, String> sourceParams) {
     try {
-      LookupResult response = Optional.ofNullable( weatherRestClientBuilder.build().get()
+      LookupResult response = Optional.ofNullable(weatherRestClient.get()
           .uri(ofParams(sourceParams))
           .retrieve()
           .body(LookupResult.class))
