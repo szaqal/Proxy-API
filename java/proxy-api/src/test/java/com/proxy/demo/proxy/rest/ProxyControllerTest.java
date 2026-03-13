@@ -84,8 +84,8 @@ class ProxyControllerTest {
 
     mockServer.expect(testcase.upstreamCallCount(), testcase.upstreamRequest()).andRespond(testcase.upstreamResponse());
     ResultActions perform = mockMvc.perform(testcase.getApiRequest());
-    for(var xxx: testcase.expectedApiResponseChecks()) {
-      perform.andExpect(xxx);
+    for(var exceptions: testcase.expectedApiResponseChecks()) {
+      perform.andExpect(exceptions);
     }
     mockServer.verify();
   }
