@@ -2,8 +2,8 @@ package com.proxy.demo.proxy.rest;
 
 import com.proxy.demo.proxy.exception.FailedToLoadException;
 import com.proxy.demo.proxy.services.impl.ProxyServiceImpl;
+import lombok.AllArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -94,8 +94,12 @@ class ProxyControllerTest {
     return Stream.of(
         Arguments.of("Should return 500 on upstream 500 error", new Upstream500ErrTestcase()),
         Arguments.of("Should return 404 on upstream returned empty response {}", new UpstreamEmptyResponse()),
-        Arguments.of("Should return 400 on missing longitude", new MissingLongitude()),
-        Arguments.of("Should return 400 on missing latitude", new MissingLatitude()),
+        Arguments.of("Should return 400 on invalid longitude (missing)", new InvalidLongitude(null)),
+        Arguments.of("Should return 400 on invalid longitude (out of range - lower bound)", new InvalidLongitude(-200.0)),
+        Arguments.of("Should return 400 on invalid longitude (out of range - upper bound)", new InvalidLongitude(200.0)),
+        Arguments.of("Should return 400 on invalid latitude (missing)", new InvalidLatitude(null)),
+        Arguments.of("Should return 400 on invalid latitude (out of range - lower bound)", new InvalidLatitude(-91.0)),
+        Arguments.of("Should return 400 on invalid latitude (out of range - upper bound)", new InvalidLatitude(91.0)),
         Arguments.of("Should return 200 with data", new ValidUpstreamResponse()),
         Arguments.of("Should return 504 on upstream timeout", new UpstreamTimeout())
     );
@@ -169,11 +173,14 @@ class ProxyControllerTest {
 
   //----
 
-  private static class MissingLongitude extends TestCase {
+  @AllArgsConstructor
+  private static class InvalidLongitude extends TestCase {
+
+    private Double longitude;
 
     @Override
     MockHttpServletRequestBuilder getApiRequest() {
-      return request(0.0, null);
+      return request(0.0, longitude);
     }
 
     @Override
@@ -187,11 +194,14 @@ class ProxyControllerTest {
     }
   }
 
-  private static class MissingLatitude extends TestCase {
+  @AllArgsConstructor
+  private static class InvalidLatitude extends TestCase {
+
+    private Double latitude;
 
     @Override
     MockHttpServletRequestBuilder getApiRequest() {
-      return request(null, 0.0);
+      return request(latitude, 0.0);
     }
 
     @Override
