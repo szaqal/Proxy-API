@@ -35,23 +35,6 @@ import java.net.ConnectException;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ProxyControllerTest {
 
-  /*
-   * Root cause of the original test failure:
-   *
-   * ProxyServiceImpl injects the already-built RestClient singleton.
-   * MockRestServiceServer.bindTo(RestClient.Builder) only installs its intercepting
-   * factory *on the builder*, not on the finished client.  The production context
-   * builds weatherRestClient at startup from a prototype RestClient.Builder, so any
-   * builder instance the test auto-wires is a different copy — the mock never sees
-   * outgoing requests.
-   *
-   * Fix: after calling MockRestServiceServer.bindTo(builder).build() (which mutates
-   * the builder's request-factory), we call builder.build() again to produce a *new*
-   * RestClient that uses the mock factory, then inject it directly into the service
-   * via ReflectionTestUtils.  This avoids touching production code and sidesteps
-   * Spring's bean-overriding restrictions introduced in Spring Boot 4 / Spring 7.
-   */
-
   @Container
   static GenericContainer<?> redis = new GenericContainer<>("redis:7-alpine")
       .withExposedPorts(6379);
@@ -65,15 +48,9 @@ class ProxyControllerTest {
   @Autowired
   private WebApplicationContext webApplicationContext;
 
-  /**
-   * The prototype builder registered by ProxyApplication.  MockRestServiceServer
-   * mutates this builder's request-factory; we then re-build from it so the service
-   * receives a client that routes through the mock.
-   */
   @Autowired
   private RestClient.Builder weatherRestClientBuilder;
 
-  /** The service whose internal RestClient we replace before each test. */
   @Autowired
   private ProxyServiceImpl proxyService;
 
@@ -83,13 +60,7 @@ class ProxyControllerTest {
   @BeforeEach
   void setUp() {
     mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-
-    // 1. Bind the mock to the shared builder — this replaces the builder's
-    //    request-factory with MockRestServiceServer's intercepting factory.
     mockServer = MockRestServiceServer.bindTo(weatherRestClientBuilder).build();
-
-    // 2. Build a fresh RestClient from the now-mutated builder and inject it
-    //    into the service so that every HTTP call goes through the mock.
     RestClient mockClient = weatherRestClientBuilder.build();
     ReflectionTestUtils.setField(proxyService, "weatherRestClient", mockClient);
   }
