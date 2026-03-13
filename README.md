@@ -29,11 +29,11 @@ What could be considered (ADRs):
 
 * NOT adding (NOW) [Spring config](https://docs.spring.io/spring-cloud-config/docs/current/reference/html/) server and automatic bean reload. 
 
-* NOT adding (NOW) Externalize client config socker/read timeout to env variable (configMap)
-
-* NOT adding (NOW) Externalize TTL for cache as config
-
 * NOT adding (NOW) any gitops ArgoCD, Flux etc...
+
+* RateLimitng COULD be added
+
+* Authentication COULD be added
 
 [Swagger](http://localhost:8080/swagger-ui/index.html)
 

@@ -36,12 +36,20 @@ public class ProxyController {
   public Response forecast(
       @Parameter(description = "Latitude of the location") @RequestParam Map<String, String> params) {
 
+    /*
+     * Here the could be some sort of while listing of params but assuming my understanding of task
+     * that this is just a proxy we would need to apply all origin's validation rules.
+     */
+
+
     Double latitude = Optional.ofNullable(params.get("latitude"))
         .map(Double::parseDouble)
+        .filter(x-> x >= -90 && x <= 90)
         .orElseThrow(FailedToLoadException::invalidLatitude);
 
     Double longitude = Optional.ofNullable(params.get("longitude"))
         .map(Double::parseDouble)
+        .filter(x -> x >= -180 && x <= 180)
         .orElseThrow(FailedToLoadException::invalidLongitude);
 
     return Optional.ofNullable(proxyService.loadWeatherData(longitude, latitude, params))

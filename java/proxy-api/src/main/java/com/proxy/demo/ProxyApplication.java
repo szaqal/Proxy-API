@@ -59,7 +59,6 @@ public class ProxyApplication {
   }
 
   /**
-   * TODO: externally configurable env variable / config map
    * <ol>
    * <li>URL should be configurable</li>
    * <li>Timeouts configurable</li>
