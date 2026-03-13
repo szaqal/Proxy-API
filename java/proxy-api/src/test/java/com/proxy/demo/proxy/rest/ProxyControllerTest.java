@@ -23,6 +23,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static com.proxy.demo.proxy.exception.FailedToLoadException.Reason.*;
 import static org.hamcrest.Matchers.containsString;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withException;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
@@ -80,16 +81,15 @@ class ProxyControllerTest {
         """;
 
     mockServer.expect(meteoRequest())
-        .andRespond(withSuccess(jsonResponse, MediaType.APPLICATION_JSON));
+        .andRespond(withSuccess(jsonResponse, APPLICATION_JSON));
 
     // When & Then
     mockMvc.perform(get("/forecast")
             .param("latitude", "52.52")
             .param("longitude", "13.41")
-            .param("current", "temperature_2m,wind_speed_10m")
         )
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().contentType(APPLICATION_JSON))
         .andExpect(jsonPath("$.source").value("open-meteo"))
         .andExpect(jsonPath("$.current.temperatureC").value(22.5))
         .andExpect(jsonPath("$.current.windSpeedKmh").value(15.3));
@@ -103,9 +103,9 @@ class ProxyControllerTest {
     mockMvc.perform(get("/forecast")
             .param("longitude", "13.41"))
         .andExpect(status().isBadRequest())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.error").value(INVALID_REQUEST.name()))
-        .andExpect(jsonPath("$.message").value("Unable to load weather data - invalid latitude"));
+        .andExpect(content().contentType(APPLICATION_JSON))
+        .andExpect(jsonPath("$.error").value("INVALID_REQUEST"))
+        .andExpect(jsonPath("$.message").value(containsString("latitude")));
   }
 
   @Test
@@ -114,25 +114,48 @@ class ProxyControllerTest {
     mockMvc.perform(get("/forecast")
             .param("latitude", "52.52"))
         .andExpect(status().isBadRequest())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.error").value(INVALID_REQUEST.name()))
-        .andExpect(jsonPath("$.message").value("Unable to load weather data - invalid longitude"));
+        .andExpect(content().contentType(APPLICATION_JSON))
+        .andExpect(jsonPath("$.error").value("INVALID_REQUEST"))
+        .andExpect(jsonPath("$.message").value(containsString("longitude")));
+  }
+
+  @Test
+  void forecast_shouldReturn400WhenLatitudeOutOfRange() throws Exception {
+    // When & Then - latitude must be between -90 and 90
+    mockMvc.perform(get("/forecast")
+            .param("latitude", "100")
+            .param("longitude", "13.41"))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().contentType(APPLICATION_JSON))
+        .andExpect(jsonPath("$.error").value("INVALID_REQUEST"))
+        .andExpect(jsonPath("$.message").value(containsString("latitude")));
+  }
+
+  @Test
+  void forecast_shouldReturn400WhenLongitudeOutOfRange() throws Exception {
+    // When & Then - longitude must be between -180 and 180
+    mockMvc.perform(get("/forecast")
+            .param("latitude", "52.52")
+            .param("longitude", "200"))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().contentType(APPLICATION_JSON))
+        .andExpect(jsonPath("$.error").value("INVALID_REQUEST"))
+        .andExpect(jsonPath("$.message").value(containsString("longitude")));
   }
 
   @Test
   void forecast_shouldReturn404WhenNoDataFound() throws Exception {
     // Given
     mockServer.expect(meteoRequest())
-        .andRespond(withSuccess("{}", MediaType.APPLICATION_JSON));
+        .andRespond(withSuccess("{}", APPLICATION_JSON));
 
     // When & Then
     mockMvc.perform(get("/forecast")
             .param("latitude", "10")
             .param("longitude", "10")
-            .param("current","temperature_2m,wind_speed_10m")
         )
         .andExpect(status().isNotFound())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().contentType(APPLICATION_JSON))
         .andExpect(jsonPath("$.error").value(UNAVAILABLE.name()))
         .andExpect(jsonPath("$.message").value("Unable to load weather data - data not available"));
 
@@ -143,7 +166,7 @@ class ProxyControllerTest {
   void forecast_shouldReturn404WhenNoCurrentProvided() throws Exception {
     // Given
     mockServer.expect(meteoRequest())
-        .andRespond(withSuccess("{}", MediaType.APPLICATION_JSON));
+        .andRespond(withSuccess("{}", APPLICATION_JSON));
 
     // When & Then
     mockMvc.perform(get("/forecast")
@@ -151,7 +174,7 @@ class ProxyControllerTest {
             .param("longitude", "0")
         )
         .andExpect(status().isNotFound())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().contentType(APPLICATION_JSON))
         .andExpect(jsonPath("$.error").value(UNAVAILABLE.name()))
         .andExpect(jsonPath("$.message").value("Unable to load weather data - data not available"));
 
@@ -168,10 +191,9 @@ class ProxyControllerTest {
     mockMvc.perform(get("/forecast")
             .param("latitude", "52.53")
             .param("longitude", "13.42")
-            .param("current", "temperature_2m,wind_speed_10m")
         )
         .andExpect(status().isGatewayTimeout())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().contentType(APPLICATION_JSON))
         .andExpect(jsonPath("$.error").value("Gateway Timeout"))
         .andExpect(jsonPath("$.message").value("Request to upstream service timed out"));
 
@@ -193,7 +215,7 @@ class ProxyControllerTest {
             .param("current", "temperature_2m,wind_speed_10m")
         )
         .andExpect(status().isInternalServerError())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().contentType(APPLICATION_JSON))
         .andExpect(jsonPath("$.error").value(UPSTREAM_SERVER_ERROR.name()))
         .andExpect(jsonPath("$.message").value("Unable to load weather data"));
 
