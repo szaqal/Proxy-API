@@ -27,7 +27,7 @@ artifact_id=proxy-api
 group_id=com.proxy.demo
 current_version=0.0.1
 tag=$(current_version)-$(shell git rev-parse --short HEAD) 
-published_image_tag=0.0.1-d922374
+published_image_tag=0.0.1-6a4c269
 
 
 init-mvn:
@@ -66,8 +66,6 @@ run-java:
 bench:
 	ab -n 100 -c 100 "http://localhost:8080/forecast?latitude=52.52&longitude=13.41&current=temperature_2m,wind_speed_10m"
 
-
-
 minikube-start:
 	minikube start --cpus 4 --memory 8000 --nodes=1
 
@@ -76,7 +74,6 @@ minikube-enable-ingress:
 
 minikube-delete:
 	minikube delete
-
 
 pods:
 	minikube kubectl -- get pods -n proxy
