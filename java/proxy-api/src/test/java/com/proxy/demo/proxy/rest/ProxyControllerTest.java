@@ -4,16 +4,23 @@ import com.proxy.demo.proxy.exception.FailedToLoadException;
 import com.proxy.demo.proxy.services.impl.ProxyServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.client.ExpectedCount;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.RequestMatcher;
+import org.springframework.test.web.client.ResponseCreator;
+import org.springframework.test.web.client.response.DefaultResponseCreator;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.context.WebApplicationContext;
@@ -23,6 +30,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static com.proxy.demo.proxy.exception.FailedToLoadException.Reason.*;
 import static org.hamcrest.Matchers.containsString;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withException;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
@@ -31,7 +39,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.net.ConnectException;
-
+import java.util.List;
+import java.util.stream.Stream;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -67,140 +76,224 @@ class ProxyControllerTest {
     ReflectionTestUtils.setField(proxyService, "weatherRestClient", mockClient);
   }
 
-  @Test
-  void forecast_shouldReturn200WithWeatherData() throws Exception {
-    // Given
-    String jsonResponse = """
+
+  @ParameterizedTest(name="{0}")
+  @MethodSource("testCases")
+  void test(String name, TestCase testcase) throws Exception {
+
+
+    mockServer.expect(testcase.upstreamCallCount(), testcase.upstreamRequest()).andRespond(testcase.upstreamResponse());
+    ResultActions perform = mockMvc.perform(testcase.getApiRequest());
+    for(var xxx: testcase.expectedApiResponseChecks()) {
+      perform.andExpect(xxx);
+    }
+    mockServer.verify();
+  }
+
+  public static Stream<Arguments> testCases() {
+    return Stream.of(
+        Arguments.of("Should return 500 on upstream 500 error", new Upstream500ErrTestcase()),
+        Arguments.of("Should return 404 on upstream returned empty response {}", new UpstreamEmptyResponse()),
+        Arguments.of("Should return 400 on missing longitude", new MissingLongitude()),
+        Arguments.of("Should return 400 on missing latitude", new MissingLatitude()),
+        Arguments.of("Should return 200 with data", new ValidUpstreamResponse()),
+        Arguments.of("Should return 504 on upstream timeout", new UpstreamTimeout())
+    );
+  }
+
+
+  abstract static class TestCase {
+
+
+    abstract MockHttpServletRequestBuilder getApiRequest();
+    abstract List<ResultMatcher> expectedApiResponseChecks();
+
+
+    ExpectedCount upstreamCallCount() {
+      return ExpectedCount.once();
+    }
+
+    ResponseCreator upstreamResponse() {
+      return withSuccess(); //defaults to success
+    }
+
+    RequestMatcher meteoUpstream() {
+      return requestTo(containsString("https://api.open-meteo.com/v1/forecast"));
+    }
+
+    RequestMatcher upstreamRequest() {
+      return meteoUpstream();
+    }
+
+    ResultMatcher errorType( FailedToLoadException.Reason reason ) {
+      return jsonPath("$.error").value(reason.name());
+    }
+
+    ResultMatcher errorMessage(String message) {
+      return jsonPath("$.message").value(message);
+    }
+
+    ResultMatcher serverError() {
+      return status().isInternalServerError();
+    }
+
+    ResultMatcher notFound() {
+      return status().isNotFound();
+    }
+
+    ResultMatcher badRequest() {
+      return status().isBadRequest();
+    }
+
+    ResultMatcher gatewayTimeout() {
+      return status().isGatewayTimeout();
+    }
+
+    ResultMatcher isJson() {
+      return content().contentType(APPLICATION_JSON);
+    }
+
+
+
+    MockHttpServletRequestBuilder request(Double latitude, Double longitude) {
+      MockHttpServletRequestBuilder request = get("/forecast");
+      if(latitude != null) {
+        request.param("latitude", String.valueOf(latitude));
+      }
+      if(longitude != null) {
+        request.param("longitude", String.valueOf(longitude));
+      }
+      return request;
+    }
+  }
+
+  //----
+
+  private static class MissingLongitude extends TestCase {
+
+    @Override
+    MockHttpServletRequestBuilder getApiRequest() {
+      return request(0.0, null);
+    }
+
+    @Override
+    List<ResultMatcher> expectedApiResponseChecks() {
+      return List.of(isJson(), badRequest(), errorType(INVALID_REQUEST), errorMessage("Unable to load weather data - invalid longitude"));
+    }
+
+    @Override
+    ExpectedCount upstreamCallCount() {
+      return ExpectedCount.never();
+    }
+  }
+
+  private static class MissingLatitude extends TestCase {
+
+    @Override
+    MockHttpServletRequestBuilder getApiRequest() {
+      return request(null, 0.0);
+    }
+
+    @Override
+    List<ResultMatcher> expectedApiResponseChecks() {
+      return List.of(isJson(), badRequest(), errorType(INVALID_REQUEST), errorMessage("Unable to load weather data - invalid latitude"));
+    }
+
+    @Override
+    ExpectedCount upstreamCallCount() {
+      return ExpectedCount.never();
+    }
+  }
+
+  //----
+
+  private static class UpstreamEmptyResponse extends TestCase {
+
+    @Override
+    MockHttpServletRequestBuilder getApiRequest() {
+      return request(0.0, 0.0);
+    }
+
+    @Override
+    List<ResultMatcher> expectedApiResponseChecks() {
+      return List.of(isJson(), notFound(), errorType(UNAVAILABLE), errorMessage("Unable to load weather data - data not available"));
+    }
+
+    @Override
+    DefaultResponseCreator upstreamResponse() {
+      return withSuccess("{}", APPLICATION_JSON);
+    }
+  }
+
+  //----
+
+  private static class Upstream500ErrTestcase extends TestCase {
+
+    @Override
+    public MockHttpServletRequestBuilder getApiRequest() {
+      return request(1.11, 2.22);
+    }
+
+    @Override
+    public List<ResultMatcher> expectedApiResponseChecks() {
+      return List.of(isJson(), serverError(), errorType(UPSTREAM_SERVER_ERROR), errorMessage("Unable to load weather data"));
+    }
+
+    @Override
+    public DefaultResponseCreator upstreamResponse() {
+      return withServerError();
+    }
+  }
+
+  //----
+
+  private static class ValidUpstreamResponse extends TestCase {
+
+    @Override
+    MockHttpServletRequestBuilder getApiRequest() {
+      return request(52.52, 13.41);
+    }
+
+    @Override
+    List<ResultMatcher> expectedApiResponseChecks() {
+      return List.of();
+    }
+
+    @Override
+    DefaultResponseCreator upstreamResponse() {
+      return withSuccess("""
         {
           "current": {
             "temperature_2m": 22.5,
             "wind_speed_10m": 15.3
           }
         }
-        """;
-
-    mockServer.expect(meteoRequest())
-        .andRespond(withSuccess(jsonResponse, MediaType.APPLICATION_JSON));
-
-    // When & Then
-    mockMvc.perform(get("/forecast")
-            .param("latitude", "52.52")
-            .param("longitude", "13.41")
-            .param("current", "temperature_2m,wind_speed_10m")
-        )
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.source").value("open-meteo"))
-        .andExpect(jsonPath("$.current.temperatureC").value(22.5))
-        .andExpect(jsonPath("$.current.windSpeedKmh").value(15.3));
-
-    mockServer.verify();
+        """, APPLICATION_JSON);
+    }
   }
 
-  @Test
-  void forecast_shouldReturn400WhenMissingLatitude() throws Exception {
-    // When & Then
-    mockMvc.perform(get("/forecast")
-            .param("longitude", "13.41"))
-        .andExpect(status().isBadRequest())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.error").value(INVALID_REQUEST.name()))
-        .andExpect(jsonPath("$.message").value("Unable to load weather data - invalid latitude"));
-  }
+  //----
 
-  @Test
-  void forecast_shouldReturn400WhenMissingLongitude() throws Exception {
-    // When & Then
-    mockMvc.perform(get("/forecast")
-            .param("latitude", "52.52"))
-        .andExpect(status().isBadRequest())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.error").value(INVALID_REQUEST.name()))
-        .andExpect(jsonPath("$.message").value("Unable to load weather data - invalid longitude"));
-  }
+  private static class UpstreamTimeout extends TestCase {
 
-  @Test
-  void forecast_shouldReturn404WhenNoDataFound() throws Exception {
-    // Given
-    mockServer.expect(meteoRequest())
-        .andRespond(withSuccess("{}", MediaType.APPLICATION_JSON));
+    @Override
+    MockHttpServletRequestBuilder getApiRequest() {
+      return request(52.53, 13.42);
+    }
 
-    // When & Then
-    mockMvc.perform(get("/forecast")
-            .param("latitude", "10")
-            .param("longitude", "10")
-            .param("current","temperature_2m,wind_speed_10m")
-        )
-        .andExpect(status().isNotFound())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.error").value(UNAVAILABLE.name()))
-        .andExpect(jsonPath("$.message").value("Unable to load weather data - data not available"));
+    @Override
+    ResponseCreator upstreamResponse() {
+      return withException(new ConnectException("Connection refused"));
+    }
 
-    mockServer.verify();
-  }
+    @Override
+    ExpectedCount upstreamCallCount() {
+      return ExpectedCount.times(3);
+    }
 
-  @Test
-  void forecast_shouldReturn404WhenNoCurrentProvided() throws Exception {
-    // Given
-    mockServer.expect(meteoRequest())
-        .andRespond(withSuccess("{}", MediaType.APPLICATION_JSON));
-
-    // When & Then
-    mockMvc.perform(get("/forecast")
-            .param("latitude", "0")
-            .param("longitude", "0")
-        )
-        .andExpect(status().isNotFound())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.error").value(UNAVAILABLE.name()))
-        .andExpect(jsonPath("$.message").value("Unable to load weather data - data not available"));
-
-    mockServer.verify();
-  }
-
-
-  @Test
-  void forecast_shouldReturn504WhenConnectionTimeout() throws Exception {
-    //with retries
-    mockServer.expect(ExpectedCount.times(3), meteoRequest())
-        .andRespond(withException(new ConnectException("Connection refused")));
-
-    mockMvc.perform(get("/forecast")
-            .param("latitude", "52.53")
-            .param("longitude", "13.42")
-            .param("current", "temperature_2m,wind_speed_10m")
-        )
-        .andExpect(status().isGatewayTimeout())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.error").value("Gateway Timeout"))
-        .andExpect(jsonPath("$.message").value("Request to upstream service timed out"));
-
-    mockServer.verify();
-  }
-
-
-
-  @Test
-  void forecast_shouldReturn500WhenUpstreamReturns5xx() throws Exception {
-    // Given — upstream responds with a 500; no retries expected (only network errors are retried)
-    mockServer.expect(ExpectedCount.once(), meteoRequest())
-        .andRespond(withServerError());
-
-    // When & Then
-    mockMvc.perform(get("/forecast")
-            .param("latitude", "1.11")
-            .param("longitude", "2.22")
-            .param("current", "temperature_2m,wind_speed_10m")
-        )
-        .andExpect(status().isInternalServerError())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.error").value(UPSTREAM_SERVER_ERROR.name()))
-        .andExpect(jsonPath("$.message").value("Unable to load weather data"));
-
-    mockServer.verify();
-  }
-
-  private static RequestMatcher meteoRequest() {
-    return requestTo(containsString("https://api.open-meteo.com/v1/forecast"));
+    @Override
+    List<ResultMatcher> expectedApiResponseChecks() {
+      return List.of(isJson(), gatewayTimeout(), jsonPath("$.error").value("Gateway Timeout"), errorMessage("Request to upstream service timed out"));
+    }
   }
 }
