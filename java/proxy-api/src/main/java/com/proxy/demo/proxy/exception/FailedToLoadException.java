@@ -30,12 +30,19 @@ public class FailedToLoadException extends RuntimeException {
 
     @Getter
     final HttpStatus status;
+
   };
 
+  @Getter
   private final Reason reason;
 
-  public FailedToLoadException(Reason reason) {
+  private FailedToLoadException(Reason reason) {
     super("Unable to load weather data");
+    this.reason = reason;
+  }
+
+  private FailedToLoadException(Reason reason, String message) {
+    super(message);
     this.reason = reason;
   }
 
@@ -52,11 +59,15 @@ public class FailedToLoadException extends RuntimeException {
   }
 
   public static FailedToLoadException unavailable() {
-    return new FailedToLoadException(UNAVAILABLE);
+    return new FailedToLoadException(UNAVAILABLE, "Unable to load weather data - data not available");
   }
 
-  public static FailedToLoadException invalidCoordinates() {
-    return new FailedToLoadException(INVALID_REQUEST);
+  public static FailedToLoadException invalidLongitude() {
+    return new FailedToLoadException(INVALID_REQUEST, "Unable to load weather data - invalid longitude");
+  }
+
+  public static FailedToLoadException invalidLatitude() {
+    return new FailedToLoadException(INVALID_REQUEST, "Unable to load weather data - invalid latitude");
   }
 
   public static RuntimeException ofRestClientException( RestClientResponseException e ) {

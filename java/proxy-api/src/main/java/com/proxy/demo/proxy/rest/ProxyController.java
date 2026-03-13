@@ -38,11 +38,11 @@ public class ProxyController {
 
     Double latitude = Optional.ofNullable(params.get("latitude"))
         .map(Double::parseDouble)
-        .orElseThrow(FailedToLoadException::invalidCoordinates);
+        .orElseThrow(FailedToLoadException::invalidLatitude);
 
     Double longitude = Optional.ofNullable(params.get("longitude"))
         .map(Double::parseDouble)
-        .orElseThrow(FailedToLoadException::invalidCoordinates);
+        .orElseThrow(FailedToLoadException::invalidLongitude);
 
     return Optional.ofNullable(proxyService.loadWeatherData(longitude, latitude, params))
         .map(this::asResponse)

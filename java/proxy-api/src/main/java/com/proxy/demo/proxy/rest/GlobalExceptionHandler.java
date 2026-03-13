@@ -15,16 +15,6 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-  @ExceptionHandler(ProxyExceptions.InvalidRequestException.class)
-  public ResponseEntity<Map<String, Object>> handleInvalidRequest(ProxyExceptions.InvalidRequestException ex) {
-    Map<String, Object> body = Map.of(
-        "error", "Bad Request",
-        "message", ex.getMessage(),
-        "timestamp", Instant.now().toString()
-    );
-    log.debug(ex.getMessage());
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
-  }
 
 
   @ExceptionHandler(ResourceAccessException.class)
@@ -41,12 +31,11 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(FailedToLoadException.class)
   public ResponseEntity<Map<String, Object>> handleResourceAccessException(FailedToLoadException ex) {
     Map<String, Object> body = Map.of(
-        "error", "Gateway Timeout",
-        "message", "Request to upstream service timed out",
+        "error", ex.getReason(), // if that itself would be considered as some internal exposed then some codes  could be returned
+        "message", ex.getMessage(),
         "timestamp", Instant.now().toString()
     );
-    log.debug("Upstream service timeout: {}", ex.getMessage());
-    return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(body);
+    return ResponseEntity.status(ex.getReason().getStatus()).body(body);
   }
 
 
