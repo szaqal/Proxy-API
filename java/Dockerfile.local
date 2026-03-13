@@ -16,7 +16,14 @@ FROM eclipse-temurin:21-jre-alpine
 
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
+
 WORKDIR /app
+
+# Download OpenTelemetry Java agent
+RUN apk add --no-cache wget && \
+    wget -q https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.11.0/opentelemetry-javaagent.jar \
+    -O /app/opentelemetry-javaagent.jar && \
+    chmod 644 /app/opentelemetry-javaagent.jar
 
 COPY --from=builder /build/target/proxy-api-0.0.1-SNAPSHOT.jar app.jar
 
@@ -29,4 +36,4 @@ EXPOSE 8080
 HEALTHCHECK --interval=15s --timeout=5s --retries=3 --start-period=15s \
     CMD wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-javaagent:/app/opentelemetry-javaagent.jar", "-jar", "app.jar"]
