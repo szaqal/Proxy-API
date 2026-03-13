@@ -5,6 +5,7 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.ResourceAccessException;
@@ -52,6 +53,19 @@ public class GlobalExceptionHandler {
         "timestamp", Instant.now().toString()
     );
     log.debug("Validation error: {}", message);
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+  }
+
+  @ExceptionHandler(MissingServletRequestParameterException.class)
+  public ResponseEntity<Map<String, Object>> handleMissingParameterException(MissingServletRequestParameterException ex) {
+    String message = "Unable to load weather data - invalid " + ex.getParameterName();
+    
+    Map<String, Object> body = Map.of(
+        "error", FailedToLoadException.Reason.INVALID_REQUEST.name(),
+        "message", message,
+        "timestamp", Instant.now().toString()
+    );
+    log.debug("Missing parameter: {}", ex.getMessage());
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
   }
 
