@@ -3,7 +3,9 @@ package com.proxy.demo.proxy.rest;
 import com.proxy.demo.proxy.exception.FailedToLoadException;
 import com.proxy.demo.proxy.services.impl.ProxyServiceImpl;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -75,7 +77,27 @@ class ProxyControllerTest {
     RestClient mockClient = weatherRestClientBuilder.build();
     ReflectionTestUtils.setField(proxyService, "weatherRestClient", mockClient);
   }
+  @Test
+  void testCache() throws Exception {
+    var testcase = new ValidUpstreamResponse(52.52, 13.41);
 
+    ExpectedCount count = testcase.upstreamCallCount(); // JUST ONE
+    mockServer.expect(count, testcase.upstreamRequest()
+    ).andRespond(testcase.upstreamResponse());
+
+
+    ResultActions actions = mockMvc.perform(testcase.getApiRequest()); //CACHE MISS
+    for(int i=0;i<5;i++) {
+      actions = mockMvc.perform(testcase.getApiRequest()); //CACHE HIT
+    }
+
+    //Upstream called once
+    for(var exceptions: testcase.expectedApiResponseChecks()) {
+      actions.andExpect(exceptions);
+    }
+
+    mockServer.verify();
+  }
 
   @ParameterizedTest(name="{0}")
   @MethodSource("testCases")
@@ -100,7 +122,7 @@ class ProxyControllerTest {
         Arguments.of("Should return 400 on invalid latitude (missing)", new InvalidLatitude(null)),
         Arguments.of("Should return 400 on invalid latitude (out of range - lower bound)", new InvalidLatitude(-91.0)),
         Arguments.of("Should return 400 on invalid latitude (out of range - upper bound)", new InvalidLatitude(91.0)),
-        Arguments.of("Should return 200 with data", new ValidUpstreamResponse()),
+        Arguments.of("Should return 200 with data", new ValidUpstreamResponse(52.67, 13.91)),
         Arguments.of("Should return 504 on upstream timeout", new UpstreamTimeout())
     );
   }
@@ -257,11 +279,15 @@ class ProxyControllerTest {
 
   //----
 
+  @AllArgsConstructor
   private static class ValidUpstreamResponse extends TestCase {
+
+    private double latitude;
+    private double longitude;
 
     @Override
     MockHttpServletRequestBuilder getApiRequest() {
-      return request(52.52, 13.41);
+      return request(latitude, longitude);
     }
 
     @Override
