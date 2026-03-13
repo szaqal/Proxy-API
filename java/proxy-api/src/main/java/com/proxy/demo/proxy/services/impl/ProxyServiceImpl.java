@@ -13,6 +13,8 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.util.UriBuilder;
 
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.util.Map;
 import java.util.Optional;
@@ -34,7 +36,7 @@ public class ProxyServiceImpl implements ProxyService {
   @Override
   @Cacheable(value = "weatherCache", key = "#longitude + ':' + #latitude")
   @Retryable(
-      retryFor = { ResourceAccessException.class },
+      retryFor = { ResourceAccessException.class, ConnectException.class, SocketTimeoutException.class },
       maxAttempts = 3,
       backoff = @Backoff(delay = 1000, multiplier = 2)
   )
@@ -44,7 +46,7 @@ public class ProxyServiceImpl implements ProxyService {
           .uri(ofParams(sourceParams))
           .retrieve()
           .body(LookupResult.class))
-          .orElseThrow(ProxyExceptions::notFound);
+          .orElseThrow(ProxyExceptions::notAvailable);
 
       log.info("Loaded {} {}", sourceParams, response);
       return response;

@@ -1,12 +1,15 @@
 package com.proxy.demo.proxy.exception;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 
 public class ProxyExceptions {
 
-  public static NotFoundException notFound() {
-    return new NotFoundException();
+  public static NotAvailableException notAvailable() {
+    return notAvailable(null);
+  }
+
+  public static NotAvailableException notAvailable(String message) {
+    return new NotAvailableException(message);
   }
 
   //TODO: differentiate message
@@ -35,7 +38,10 @@ public class ProxyExceptions {
     return new RuntimeException("Unrecognized upstream exception");
   }
 
-  public static class NotFoundException extends RuntimeException {
+  public static class NotAvailableException extends RuntimeException {
+    public NotAvailableException(String message) {
+      super(message);
+    }
   }
 
   public static class InvalidRequestException extends RuntimeException {

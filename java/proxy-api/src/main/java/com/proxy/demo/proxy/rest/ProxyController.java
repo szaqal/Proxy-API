@@ -46,12 +46,12 @@ public class ProxyController {
 
     return Optional.ofNullable(proxyService.loadWeatherData(longitude, latitude, params))
         .map(this::asResponse)
-        .orElseThrow(ProxyExceptions::notFound);
+        .orElseThrow(ProxyExceptions::notAvailable);
   }
 
   private Response asResponse(LookupResult lookupResult) {
     if(lookupResult.getCurrent() == null) {
-      throw ProxyExceptions.notFound();
+      throw ProxyExceptions.notAvailable();
     }
 
     return new Response("open-meteo", Instant.now(),
